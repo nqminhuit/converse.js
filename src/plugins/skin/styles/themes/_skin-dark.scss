@@ -149,7 +149,8 @@
     --skin-surface-sunken: #202035;
     --skin-border: #333346;
     --skin-bubble-them: #202035;
-    --skin-bubble-me: #0d6efd;
+    // Darker than the dashboard's #0d6efd accent: 90% white on it is 3.92:1 (fails AA); #0b5ed7 keeps it at 5.04:1.
+    --skin-bubble-me: #0b5ed7;
     --skin-bubble-me-text: #ffffff;
     --skin-accent-contrast: var(--background-color);
     --skin-muted-text: var(--subdued-color);
