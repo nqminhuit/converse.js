@@ -142,6 +142,12 @@ $skin-control-size: 40px;
             }
         }
 
+        // Upstream renders the preview in both the panel and the form it wraps, under the same condition.
+        // Hide the form's copy only while the panel has its own, so an upstream fix can't hide both.
+        &:has(> converse-reply-preview) > :is(converse-message-form, converse-muc-message-form) > converse-reply-preview {
+            display: none;
+        }
+
         // With a reply pending, the preview and the form read as one block: the hairline moves above the preview.
         &:has(> converse-reply-preview .reply-preview) {
             > converse-reply-preview:has(.reply-preview) {

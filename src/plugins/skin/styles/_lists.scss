@@ -202,7 +202,12 @@
                 padding-inline-start: var(--skin-space-2);
             }
 
-            // Colour and shape only: upstream positions this badge over the avatar.
+            // The row inset and larger avatar leave the nick little room; upstream's ellipsis needs nowrap to apply.
+            .occupant-nick {
+                white-space: nowrap;
+            }
+
+            // Colour and shape only: _avatars.scss pins this badge to the avatar corner.
             .msgs-indicator {
                 @include skin-unread-badge;
             }

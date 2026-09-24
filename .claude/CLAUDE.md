@@ -104,13 +104,20 @@ Do not change any other upstream file (SCSS, templates, JS, `dev.html`, `package
 | T6 motion | `styles/_motion.scss` |
 | T7 responsive and embedded | `styles/_responsive.scss` |
 | T8 app chrome | `styles/_chrome.scss` |
-| T9 integration | any skin file, for cross-task fixes only |
+| T9 integration | any skin file, for cross-task fixes only; `occupants-autohide.js`, `tests/occupants-autohide.js` |
 
 ### `avatar_sizes` setting
 
 An object of pixel sizes, merged over the defaults
 `{ message: 44, heading: 44, list: 36, occupant: 32, profile: 48 }`. Each key is written to
 `--skin-avatar-<key>` on `document.documentElement` and applies under any theme.
+
+### Occupant list auto-hide
+
+`occupants-autohide.js` (added by T9) collapses the MUC occupant list by default when the chat app, not
+the viewport, is `$skin-medium` (1024px) wide or less. It only acts under a `skin-*` theme in
+`embedded` or `fullscreen` mode. It runs when a room view opens and when a `ResizeObserver` sees the
+app shrink from wide to narrow. It never opens the list, so the user's toggle still works.
 
 ### Embedding on a dashboard
 
