@@ -135,6 +135,9 @@ attribute, which those view modes already use for other things. The flag is refl
 and let the open chat fill the pane; the button itself is hidden at `$skin-narrow` widths, where T7's
 own list/chat toggle takes over. A safety net reopens the sidebar if the last visible chat closes
 while it's hidden, so the user is never left with an empty panel. Set to `false` to disable.
+The flag is ignored (never reflected as the data attribute) while logged out or when the setting
+itself is off, so a stale `skin_sidebar_hidden: true` can't hide the login form or leave the
+sidebar stuck with no button to bring it back.
 
 ### Occupant list auto-hide
 

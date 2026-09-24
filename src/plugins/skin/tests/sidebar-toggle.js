@@ -128,4 +128,45 @@ describe('The skin sidebar toggle', function () {
             expect(chatview.querySelector(TOGGLE_SELECTOR)).toBeNull();
         }),
     );
+
+    it(
+        'clears the hidden-sidebar attribute on logout, so the login form is not left hidden',
+        mock.initConverse(converse, [], embedded, async (_converse) => {
+            const jid = await getFirstContactJID(_converse);
+            await mock.openChatBoxFor(_converse, jid);
+            const chatview = _converse.chatboxviews.get(jid);
+            const controlbox = getControlBox(_converse);
+            const root = document.querySelector('converse-root');
+
+            const hide_button = await u.waitUntil(() => chatview.querySelector(TOGGLE_SELECTOR));
+            hide_button.click();
+            await u.waitUntil(() => controlbox.get('skin_sidebar_hidden') === true);
+            await u.waitUntil(() => root.hasAttribute('data-skin-sidebar-hidden'));
+
+            // Sets `connected: false` directly, the same path `clearSession`/`disconnect`
+            // (src/plugins/controlbox/utils.js) take on logout: they flip it on the controlbox
+            // model without closing any chatbox or firing `chatBoxClosed`.
+            controlbox.save({ connected: false });
+
+            await u.waitUntil(() => !root.hasAttribute('data-skin-sidebar-hidden'));
+            // The flag itself is left untouched, only its reflection while logged out.
+            expect(controlbox.get('skin_sidebar_hidden')).toBe(true);
+        }),
+    );
+
+    it(
+        'never sets the hidden-sidebar attribute when skin_sidebar_toggle is disabled',
+        mock.initConverse(converse, [], { ...embedded, skin_sidebar_toggle: false }, async (_converse) => {
+            const jid = await getFirstContactJID(_converse);
+            await mock.openChatBoxFor(_converse, jid);
+            const controlbox = getControlBox(_converse);
+            const root = document.querySelector('converse-root');
+
+            // Simulates a flag persisted from an earlier session where the setting was enabled.
+            controlbox.save({ skin_sidebar_hidden: true });
+
+            await u.waitUntil(() => controlbox.get('skin_sidebar_hidden') === true);
+            expect(root.hasAttribute('data-skin-sidebar-hidden')).toBe(false);
+        }),
+    );
 });

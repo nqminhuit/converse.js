@@ -83,7 +83,9 @@ $skin-paned-app: 'converse-app-chat.converse-embedded, converse-app-chat.convers
     @container converse (width > #{$skin-narrow}) {
         &[data-skin-sidebar-hidden] {
             #{$skin-paned-app} {
-                > #controlbox {
+                // :not(.logged-out) keeps the login form visible if the flag is stale from a
+                // previous session (see reflectAttribute in sidebar-toggle.js).
+                > #controlbox:not(.logged-out) {
                     display: none;
                 }
 
