@@ -36,6 +36,23 @@
     }
 }
 
+// Theme toggle (added by T9): its own `.btn-toolbar` sits beside upstream's settings/close one, so
+// the host needs to lay both out as one row instead of stacking them (its default is inline).
+converse-controlbox-buttons {
+    @include skin {
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .skin-theme-toggle {
+        @include skin {
+            // Matches the fill upstream gives `.controlbox-heading__btn converse-icon svg`; the
+            // sun is a plain inline `<svg fill="currentColor">`, not a `converse-icon`.
+            color: var(--controlbox-color);
+        }
+    }
+}
+
 // Controlbox: a plain surface panel with a hairline edge instead of the coloured rule and shadow.
 converse-controlbox#controlbox .flyout.box-flyout {
     @include skin {

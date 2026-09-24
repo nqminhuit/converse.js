@@ -117,7 +117,7 @@ once upstream's roster item handles `chat` too.
 | T6 motion | `styles/_motion.scss` |
 | T7 responsive and embedded | `styles/_responsive.scss` |
 | T8 app chrome | `styles/_chrome.scss` |
-| T9 integration | any skin file, for cross-task fixes only; `occupants-autohide.js`, `tests/occupants-autohide.js`, `sidebar-toggle.js`, `tests/sidebar-toggle.js`, `blocklist-menu.js`, `tests/blocklist-menu.js` |
+| T9 integration | any skin file, for cross-task fixes only; `occupants-autohide.js`, `tests/occupants-autohide.js`, `sidebar-toggle.js`, `tests/sidebar-toggle.js`, `blocklist-menu.js`, `tests/blocklist-menu.js`, `theme-toggle.js`, `tests/theme-toggle.js` |
 
 ### `avatar_sizes` setting
 
@@ -142,6 +142,18 @@ while it's hidden, so the user is never left with an empty panel. Set to `false`
 the viewport, is `$skin-medium` (1024px) wide or less. It only acts under a `skin-*` theme in
 `embedded` or `fullscreen` mode. It runs when a room view opens and when a `ResizeObserver` sees the
 app shrink from wide to narrow. It never opens the list, so the user's toggle still works.
+
+### Theme toggle
+
+Defaults to `true` (`skin_theme_toggle` setting). `theme-toggle.js` (added by T9) adds a button next
+to the settings gear in the controlbox profile row, shown only under a `skin-*` theme, that flips
+between `skin-light` and `skin-dark`. It forces the choice by setting both the `theme` and
+`dark_theme` settings to the same value, which overrides the OS `prefers-color-scheme` pick for that
+viewer for the rest of the session. The choice is stored in `localStorage` under
+`converse-skin-theme`, which is scoped per origin: on a page that embeds converse.js in an iframe
+(e.g. a dashboard) alongside a standalone page on the same origin, both share the stored choice, since
+`localStorage` is keyed by origin, not by frame. Set to `false` to disable, in which case no button
+shows and no stored choice is applied.
 
 ### Blocklist menu
 
