@@ -4,6 +4,10 @@
 // Own messages in a 1:1 chat (MUCs stay left-aligned). `/me` and retracted lines stay plain.
 $skin-own-1to1: 'converse-chat .message.chat-msg:has(> .chat-msg__content--me):not(.chat-msg--action)';
 
+// A file upload in progress. The template gives this row none of the sender/type classes a real
+// message carries, but an upload is always the current user's own, so it gets the "me" treatment.
+$skin-file-progress: '.message.chat-msg:has(> .chat-msg__content > progress)';
+
 @include skin {
     // Rows and rhythm: a bubble carries the highlight, so the row itself no longer does.
     .message.chat-msg {
@@ -272,6 +276,57 @@ $skin-own-1to1: 'converse-chat .message.chat-msg:has(> .chat-msg__content--me):n
             border-end-start-radius: var(--skin-bubble-radius);
             border-start-end-radius: var(--skin-radius-sm);
             border-end-end-radius: var(--skin-radius-sm);
+        }
+    }
+
+    // File-upload progress bubble. Colour it like a "me" bubble in every chat type, but only shove
+    // it to the right in 1:1 chats, matching how $skin-own-1to1 treats a real own message.
+    #{$skin-file-progress} .chat-msg__content {
+        width: fit-content;
+        max-width: min(75%, 42rem);
+        padding: var(--skin-space-2) var(--skin-space-3);
+        border-radius: var(--skin-bubble-radius);
+        background-color: var(--skin-bubble-me);
+        color: var(--skin-bubble-me-text);
+
+        .chat-msg__text {
+            color: var(--skin-bubble-me-text);
+        }
+
+        // A thin, rounded bar on the blue fill: a translucent track with a solid value.
+        progress {
+            display: block;
+            width: 100%;
+            height: 5px;
+            margin-top: var(--skin-space-1);
+            border: 0;
+            border-radius: var(--skin-radius-pill);
+            appearance: none;
+            background-color: color-mix(in srgb, var(--skin-bubble-me-text) 30%, transparent);
+
+            &::-webkit-progress-bar {
+                background-color: color-mix(in srgb, var(--skin-bubble-me-text) 30%, transparent);
+                border-radius: var(--skin-radius-pill);
+            }
+
+            &::-webkit-progress-value {
+                background-color: var(--skin-bubble-me-text);
+                border-radius: var(--skin-radius-pill);
+            }
+
+            &::-moz-progress-bar {
+                background-color: var(--skin-bubble-me-text);
+                border-radius: var(--skin-radius-pill);
+            }
+        }
+    }
+
+    converse-chat #{$skin-file-progress} {
+        flex-direction: row-reverse;
+
+        .chat-msg__content {
+            margin-inline-start: calc(var(--skin-avatar-message, 44px) + 0.5rem);
+            margin-inline-end: 0.5rem;
         }
     }
 
