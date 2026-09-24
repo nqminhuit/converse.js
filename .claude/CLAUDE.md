@@ -79,6 +79,13 @@ Do not change any other upstream file (SCSS, templates, JS, `dev.html`, `package
 `VIEW_PLUGINS.push('converse-skin')`. Fork files outside the plugin are `skin.html`,
 `skin-embedded.html` and `.claude/`.
 
+Deliberate exception: `src/shared/components/dropdown.js` also carries a small upstream fix —
+`DropdownBase.show()` (`src/shared/components/dropdownbase.js`) only closes a dropdown on an
+outside click, so picking a `.dropdown-item` (message actions, heading ☰ menus) ran the action
+but left the menu open. `Dropdown.registerEvents()`/`unregisterEvents()` add/remove a bubble-phase
+`click` listener that closes it on an item pick instead. Drop this once upstream fixes
+`DropdownBase` itself.
+
 ### Rules
 
 - Skin-look rules go under `[data-converse-theme^='skin-']` via `@include skin { ... }` from
