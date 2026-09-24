@@ -65,17 +65,35 @@ export default class Dropdown extends DropdownBase {
     registerEvents() {
         this._onKeyDown = /** @param {KeyboardEvent} ev */ (ev) => this.#onKeyDown(ev);
         this._onDropdownHide = () => this.#onDropdownHide();
+        // DropdownBase.show() only closes on an outside click; close on an item pick too.
+        this._onItemClick = /** @param {MouseEvent} ev */ (ev) => this.#onItemClick(ev);
         this.addEventListener('converse:dropdown:hide', this._onDropdownHide);
         this.addEventListener('keydown', this._onKeyDown);
+        this.addEventListener('click', this._onItemClick);
     }
 
     unregisterEvents() {
         this.removeEventListener('keydown', this._onKeyDown);
         this.removeEventListener('converse:dropdown:hide', this._onDropdownHide);
+        this.removeEventListener('click', this._onItemClick);
     }
 
     #onDropdownHide() {
         this.disableArrowNavigation();
+    }
+
+    /**
+     * Bubble phase, so the item's own `@click` handler (e.g. Copy, Add Reaction) has
+     * already run by the time this fires.
+     * @param {MouseEvent} ev
+     */
+    #onItemClick(ev) {
+        const item = /** @type {HTMLButtonElement} */ (
+            /** @type {HTMLElement} */ (ev.target)?.closest?.('.dropdown-item')
+        );
+        if (!item || item.disabled || item.classList.contains('disabled') || !this.menu?.contains(item)) return;
+        if (!this.menu.classList.contains('show')) return;
+        this.hide();
     }
 
     initArrowNavigation() {
