@@ -6,6 +6,7 @@ const { u } = converse.env;
 const STORAGE_KEY = 'converse-skin-theme';
 const TOGGLE_SELECTOR = '.skin-theme-toggle';
 const embedded = { theme: 'skin-light', dark_theme: 'skin-dark', view_mode: 'embedded' };
+const pinned = { theme: 'skin-dark', dark_theme: 'skin-dark', view_mode: 'embedded' };
 
 /**
  * Opens the controlbox and waits for the profile row (and hence the toggle, if it applies).
@@ -86,6 +87,24 @@ describe('The skin theme toggle', function () {
             expect(root.getAttribute('data-converse-theme')).toBe('classic');
         })();
     });
+
+    it('ignores a stored choice and shows no button on a page that pins one theme', function () {
+        localStorage.setItem(STORAGE_KEY, 'skin-light');
+        return mock.initConverse(converse, [], pinned, async (_converse) => {
+            await openProfileRow(_converse);
+            const root = await u.waitUntil(() => document.querySelector('converse-root'));
+            expect(root.getAttribute('data-converse-theme')).toBe('skin-dark');
+            expect(document.querySelector(TOGGLE_SELECTOR)).toBeNull();
+        })();
+    });
+
+    it(
+        'shows no button on a pinned page with nothing stored',
+        mock.initConverse(converse, [], pinned, async (_converse) => {
+            await openProfileRow(_converse);
+            expect(document.querySelector(TOGGLE_SELECTOR)).toBeNull();
+        }),
+    );
 
     it(
         'still switches the theme in-session if localStorage throws',

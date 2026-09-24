@@ -30,6 +30,10 @@ const TPL_SUN = html`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="cur
 // Guards against re-patching `render()` on every `converse.initialize()` call (e.g. across tests).
 let patched = false;
 
+// Whether the page pinned `theme`/`dark_theme` to the same value, captured at init time before
+// a stored choice or click can make them equal on their own. Re-set on each init (tests re-init).
+let pinned = false;
+
 /**
  * @param {string} [theme]
  */
@@ -38,10 +42,11 @@ function isSkinTheme(theme) {
 }
 
 /**
- * The toggle is inert (no button, no applied choice) outside a skin theme or when disabled.
+ * The toggle is inert (no button, no applied choice) outside a skin theme, when disabled, or when
+ * the page pinned a single theme (e.g. an embedded dashboard sharing origin with a standalone page).
  */
 function appliesThemeToggle() {
-    return !!api.settings.get(SETTING) && isSkinTheme(getTheme());
+    return !!api.settings.get(SETTING) && isSkinTheme(getTheme()) && !pinned;
 }
 
 /**
@@ -145,7 +150,9 @@ function patchControlboxButtons() {
 export function initThemeToggle() {
     api.settings.extend({ [SETTING]: true });
 
-    if (api.settings.get(SETTING)) {
+    pinned = api.settings.get('theme') === api.settings.get('dark_theme');
+
+    if (api.settings.get(SETTING) && !pinned) {
         const stored = readStoredTheme();
         if (stored && isSkinTheme(getTheme())) applyTheme(stored);
     }
