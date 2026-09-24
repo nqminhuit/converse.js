@@ -238,6 +238,19 @@ $skin-file-progress: '.message.chat-msg:has(> .chat-msg__content > progress)';
         opacity: 1;
     }
 
+    // The reaction "+" picker's panel is otherwise unskinned (plain background, no
+    // border/radius/shadow); give it the composer picker's panel treatment.
+    converse-emoji-picker-dropdown .dropdown-menu {
+        --background-color: var(--skin-surface-raised);
+
+        @include skin-emoji-category-tabs;
+
+        border: 1px solid var(--skin-border);
+        border-radius: var(--skin-radius-md);
+        background-color: var(--skin-surface-raised);
+        box-shadow: var(--skin-shadow-2);
+    }
+
     // Own messages in 1:1 chats sit on the right, with the avatar after the bubble.
     #{$skin-own-1to1} {
         flex-direction: row-reverse;

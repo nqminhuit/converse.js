@@ -12,3 +12,44 @@
         }
     }
 }
+
+// Pill-shaped emoji-category tabs, shared by every emoji picker (composer, reaction "+" picker,
+// Social composer). Include inside `@include skin { <picker> .dropdown-menu { ... } }`.
+@mixin skin-emoji-category-tabs {
+    --highlight-color: var(--skin-active);
+    --highlight-color-hover: var(--skin-hover);
+
+    .emoji-picker__header .emoji-category {
+        // Upstream's `.dropdown-menu .selected` rule still paints this `<li>` via the
+        // re-pointed `--highlight-color(-hover)` above; keep it transparent instead.
+        background: transparent;
+
+        &.selected a,
+        &:hover a {
+            background-color: var(--skin-hover);
+        }
+
+        // Upstream fills the picked category with `--heading-color`, a solid black/white chip.
+        // `&.picked:hover` keeps the ring instead of losing it to the plain hover tint above.
+        &.picked a,
+        &.picked:hover a {
+            background-color: var(--skin-active);
+            box-shadow: inset 0 -2px 0 var(--skin-accent);
+        }
+
+        a {
+            border-radius: var(--skin-radius-pill);
+
+            &:focus-visible {
+                outline: none;
+                box-shadow: 0 0 0 3px var(--skin-focus-ring);
+            }
+        }
+
+        &.picked a:focus-visible {
+            box-shadow:
+                inset 0 -2px 0 var(--skin-accent),
+                0 0 0 3px var(--skin-focus-ring);
+        }
+    }
+}
