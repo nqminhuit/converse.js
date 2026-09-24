@@ -6,6 +6,8 @@
 $skin-list-width: 300px;
 $skin-list-width-medium: 240px;
 $skin-touch-target: 40px;
+// App shells laid out as list + chat panes (singleton shows one chat only).
+$skin-paned-app: 'converse-app-chat.converse-embedded, converse-app-chat.converse-fullscreen:not(.converse-singleton)';
 
 @include skin {
     // The query container is converse-app-chat, not converse-root: modals and toasts are its siblings,
@@ -18,6 +20,7 @@ $skin-touch-target: 40px;
 
     // Embedded: fill the host container, with no viewport-height assumptions.
     &.converse-embedded {
+        display: block;
         height: 100%;
         --fullpage-chat-height: 100%;
         --mobile-chat-height: 100%;
@@ -42,8 +45,7 @@ $skin-touch-target: 40px;
     }
 
     // Panes: a fixed-width list and a chat that takes the rest.
-    converse-app-chat.converse-embedded,
-    converse-app-chat.converse-fullscreen:not(.converse-singleton) {
+    #{$skin-paned-app} {
         flex-wrap: nowrap;
 
         > .chatbox {
@@ -78,8 +80,7 @@ $skin-touch-target: 40px;
 
     // Medium: a narrower list beside the chat.
     @container converse (width <= #{$skin-medium}) {
-        converse-app-chat.converse-embedded,
-        converse-app-chat.converse-fullscreen:not(.converse-singleton) {
+        #{$skin-paned-app} {
             > #controlbox:not(.logged-out) {
                 flex-basis: $skin-list-width-medium;
             }
@@ -96,8 +97,7 @@ $skin-touch-target: 40px;
     // Narrow: one pane. The list shows until a chat opens; the chat's existing back arrow
     // (navigateToControlBox) hides the chat again, so no JS is needed.
     @container converse (width <= #{$skin-narrow}) {
-        converse-app-chat.converse-embedded,
-        converse-app-chat.converse-fullscreen:not(.converse-singleton) {
+        #{$skin-paned-app} {
             > #controlbox:not(.logged-out) {
                 flex: 1 1 100%;
             }
@@ -170,6 +170,7 @@ $skin-touch-target: 40px;
         .chatbox-btn .btn--standalone,
         .chat-toolbar button,
         .chat-toolbar .btn,
+        converse-dropdown > .dropdown-toggle,
         .send-button {
             min-width: $skin-touch-target;
             min-height: $skin-touch-target;
@@ -179,6 +180,10 @@ $skin-touch-target: 40px;
         .list-item {
             min-height: $skin-touch-target;
             align-items: center;
+        }
+
+        .dropdown-item {
+            min-height: $skin-touch-target;
         }
 
         .bottom-panel {
