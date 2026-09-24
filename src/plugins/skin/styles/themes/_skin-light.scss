@@ -7,10 +7,11 @@
 
     // Hex color values
     // ----------------
-    // The classic palette names are kept so upstream rules still resolve; `--blue` is the skin accent.
-    --blue: #4059d9;
-    --blue-rgb: 64, 89, 217;
-    --dark-blue: #3148bf;
+    // The classic palette names are kept so upstream rules still resolve; `--blue` is the skin accent,
+    // matched to the dashboard's `--accent` so the embedded panel and iframe share one blue.
+    --blue: #0d6efd;
+    --blue-rgb: 13, 110, 253;
+    --dark-blue: #0a58ca;
     --dark-green: #177a43;
     --dark-green-rgb: 23, 122, 67;
     --red: #d1343b;
@@ -20,7 +21,7 @@
     --green-rgb: 26, 127, 72;
     --light-blue: #5a6478;
     --light-blue-rgb: 90, 100, 120;
-    --lighter-blue: #eceffd;
+    --lighter-blue: #e7f1ff;
     --orange: #b45309;
     --orange-rgb: 180, 83, 9;
     --redder-orange: #c2410c;
@@ -106,11 +107,11 @@
     --subdued-color: var(--gray);
 
     // The background when selecting text with your mouse
-    --selection-color: #c7cff7;
+    --selection-color: #cfe2ff;
 
     // Used to indicate selected or open items in lists.
     --highlight-color: var(--lighter-blue);
-    --highlight-color-hover: #e2e7fc;
+    --highlight-color-hover: #dbe9ff;
 
     // 1:1 Chat-related colors
     // Heads are neutral panels; T8 draws the edge, and the name carries the text colour.
@@ -135,7 +136,7 @@
     --chat-color-hover: var(--dark-blue);
     --danger-color-hover: #b3262d;
     --global-background-color: #f5f6f8;
-    --link-color-hover: #273a9c;
+    --link-color-hover: #084298;
     --muc-color-hover: var(--dark-blue);
     --primary-color-hover: var(--dark-blue);
     --secondary-color-hover: #475063;

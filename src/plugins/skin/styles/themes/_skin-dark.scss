@@ -7,31 +7,32 @@
 
     // Hex color values
     // ----------------
-    // The classic palette names are kept so upstream rules still resolve; `--blue` is the skin accent,
-    // lightened so it reads on the dark panels. Filled accents therefore take dark text.
-    --blue: #8b9dff;
-    --blue-rgb: 139, 157, 255;
-    --dark-blue: #a5b3ff;
-    --dark-green: #4cc98a;
-    --dark-green-rgb: 76, 201, 138;
-    --red: #ff6b6b;
-    --red-rgb: 255, 107, 107;
-    --gray: #9aa1b1;
-    --green: #3ecf7c;
-    --green-rgb: 62, 207, 124;
-    --light-blue: #aab3c5;
-    --light-blue-rgb: 170, 179, 197;
-    --lighter-blue: #252b3d;
-    --orange: #f5a524;
-    --orange-rgb: 245, 165, 36;
-    --redder-orange: #fb8a4c;
-    --redder-orange-rgb: 251, 138, 76;
+    // Retuned to match the user's dashboard palette (violet-navy panels, blue/red/green/amber
+    // accents). The classic names are kept so upstream rules still resolve; `--blue` is the skin
+    // accent, light enough to read as text on the dashboard's card colour.
+    --blue: #6ea8fe;
+    --blue-rgb: 110, 168, 254;
+    --dark-blue: #9ec5fe;
+    --dark-green: #33d375;
+    --dark-green-rgb: 51, 211, 117;
+    --red: #ff5252;
+    --red-rgb: 255, 82, 82;
+    --gray: #9797a0;
+    --green: #00c853;
+    --green-rgb: 0, 200, 83;
+    --light-blue: #b4b4c8;
+    --light-blue-rgb: 180, 180, 200;
+    --lighter-blue: #35355a;
+    --orange: #ffb300;
+    --orange-rgb: 255, 179, 0;
+    --redder-orange: #ff8c21;
+    --redder-orange-rgb: 255, 140, 33;
 
     // Base variables
     // --------------
-    --foreground-color: #e6e8ee;
-    --background-color: #171a21;
-    --background-color-rgb: 23, 26, 33;
+    --foreground-color: #f1f1f1;
+    --background-color: #2a2a3d;
+    --background-color-rgb: 42, 42, 61;
 
     --chat-rgb: var(--blue-rgb);
     --muc-rgb: var(--blue-rgb);
@@ -95,11 +96,11 @@
     // Online status indicators
     --chat-status-away: var(--orange);
     --chat-status-busy: var(--red);
-    --chat-status-offline: #6b7282;
+    --chat-status-offline: #6c6c80;
     --chat-status-online: var(--green);
 
     --controlbox-color: var(--blue);
-    --disabled-color: #6b7282;
+    --disabled-color: #6c6c80;
     --error-color: var(--red);
     --focus-color: var(--blue);
     --heading-color: var(--foreground-color);
@@ -107,11 +108,11 @@
     --subdued-color: var(--gray);
 
     // The background when selecting text with your mouse
-    --selection-color: #3a4680;
+    --selection-color: #2f4a7a;
 
     // Used to indicate selected or open items in lists.
     --highlight-color: var(--lighter-blue);
-    --highlight-color-hover: #2c3348;
+    --highlight-color-hover: #45456e;
 
     // 1:1 Chat-related colors
     // Heads are neutral panels; T8 draws the edge, and the name carries the text colour.
@@ -134,21 +135,21 @@
     // --------------
     --brand-heading-color: var(--blue);
     --chat-color-hover: var(--dark-blue);
-    --danger-color-hover: #ff8a8a;
-    --global-background-color: #0f1115;
+    --danger-color-hover: #ff7575;
+    --global-background-color: #1e1e2f;
     --link-color-hover: var(--dark-blue);
     --muc-color-hover: var(--dark-blue);
     --primary-color-hover: var(--dark-blue);
-    --secondary-color-hover: #c2c9d6;
-    --warning-color-hover: #f7b84d;
+    --secondary-color-hover: #bfbfd0;
+    --warning-color-hover: #ffc233;
 
-    // Skin contract overrides: white on the light accent fails contrast, so the "me" bubble is a
-    // deeper blue with white text and other accent fills take the panel colour as text.
-    --skin-surface-raised: #1f232c;
-    --skin-surface-sunken: #111318;
-    --skin-border: #2a2f3a;
-    --skin-bubble-them: #232733;
-    --skin-bubble-me: #4560e0;
+    // Skin contract overrides: white on the light accent fails contrast, so the "me" bubble is the
+    // dashboard's filled accent blue with white text and other accent fills take the panel colour as text.
+    --skin-surface-raised: #303046;
+    --skin-surface-sunken: #202035;
+    --skin-border: #333346;
+    --skin-bubble-them: #202035;
+    --skin-bubble-me: #0d6efd;
     --skin-bubble-me-text: #ffffff;
     --skin-accent-contrast: var(--background-color);
     --skin-muted-text: var(--subdued-color);
