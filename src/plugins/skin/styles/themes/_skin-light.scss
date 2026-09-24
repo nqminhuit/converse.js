@@ -82,6 +82,8 @@
         --converse-list-group-color: var(--foreground-color);
         &.active {
             --converse-list-group-active-color: var(--background-color) !important;
+            --converse-list-group-active-bg: var(--primary-color) !important;
+            --converse-list-group-active-border-color: var(--primary-color) !important;
         }
     }
     .toast {
