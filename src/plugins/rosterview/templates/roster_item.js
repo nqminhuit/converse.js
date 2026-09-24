@@ -69,7 +69,7 @@ export default (el) => {
     const bare_jid = _converse.session.get('bare_jid');
     const show = el.model.getStatus() || 'offline';
     let classes, color;
-    if (show === 'online') {
+    if (show === 'online' || show === 'chat') {
         [classes, color] = ['fa fa-circle', 'chat-status-online'];
     } else if (show === 'dnd') {
         [classes, color] = ['fa fa-minus-circle', 'chat-status-busy'];

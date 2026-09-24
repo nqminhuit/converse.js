@@ -75,9 +75,9 @@ import './plugins/skin/index.js'; // fork: reskin
 ```
 
 Do not change any other upstream file (SCSS, templates, JS, `dev.html`, `package.json`,
-`vitest.config.js`, `src/shared/constants.js`). The plugin whitelists itself with
-`VIEW_PLUGINS.push('converse-skin')`. Fork files outside the plugin are `skin.html`,
-`skin-embedded.html` and `.claude/`.
+`vitest.config.js`, `src/shared/constants.js`), except the deliberate exceptions below. The plugin
+whitelists itself with `VIEW_PLUGINS.push('converse-skin')`. Fork files outside the plugin are
+`skin.html`, `skin-embedded.html` and `.claude/`.
 
 Deliberate exception: `src/shared/components/dropdown.js` also carries a small upstream fix —
 `DropdownBase.show()` (`src/shared/components/dropdownbase.js`) only closes a dropdown on an
@@ -85,6 +85,12 @@ outside click, so picking a `.dropdown-item` (message actions, heading ☰ menus
 but left the menu open. `Dropdown.registerEvents()`/`unregisterEvents()` add/remove a bubble-phase
 `click` listener that closes it on an item pick instead. Drop this once upstream fixes
 `DropdownBase` itself.
+
+Deliberate exception: `src/plugins/rosterview/templates/roster_item.js` also carries a one-line
+upstream fix. The roster dot coloured only `online`, `dnd` and `away`, so a contact sending
+`<show>chat</show>` ("free for chat") fell through to `chat-status-offline` and looked offline,
+although upstream's own profile and occupant templates already treat `chat` as online. Drop this
+once upstream's roster item handles `chat` too.
 
 ### Rules
 
@@ -166,5 +172,6 @@ converse.initialize({
 Run `npm run dev`, then `npx vitest run --project main src/plugins/skin/tests/`, `npm run lint` and
 the full `npm test` (the skin loads in every suite). Look at `skin.html` and `skin-embedded.html`
 under `npm run devserver` in light and dark. `git fetch upstream && git diff upstream/master --stat`
-must show only the one-line `src/index.js` change plus `src/plugins/skin/**`, `skin*.html` and
-`.claude/**`.
+must show only the one-line `src/index.js` change plus `src/plugins/skin/**`, `skin*.html`,
+`.claude/**` and the deliberate exceptions above (`src/shared/components/dropdown.js`,
+`src/plugins/rosterview/templates/roster_item.js`).
