@@ -1,0 +1,14 @@
+// Scopes rules to skin themes: call it inside a component selector or at top level, never inside a `.conversejs` wrapper.
+@mixin skin {
+    @if & {
+        .conversejs[data-converse-theme^='skin-'] &,
+        converse-bg[data-converse-theme^='skin-'] & {
+            @content;
+        }
+    } @else {
+        .conversejs[data-converse-theme^='skin-'],
+        converse-bg[data-converse-theme^='skin-'] {
+            @content;
+        }
+    }
+}

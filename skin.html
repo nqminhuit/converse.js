@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Converse (skin)</title>
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="Converse XMPP/Jabber Chat" />
+        <meta name="author" content="JC Brand" />
+        <meta name="keywords" content="xmpp chat webchat converse.js" />
+        <link rel="manifest" href="./manifest.json" />
+        <link rel="shortcut icon" type="image/ico" href="images/favicon.ico" />
+        <link type="text/css" rel="stylesheet" media="screen" href="dist/converse.css" />
+        <script type="module" src="dist/converse.js"></script>
+    </head>
+
+    <body class="reset" style="background-color: var(--global-background-color)">
+        <script type="module">
+            converse.plugins.add('converse-debug', {
+                initialize() {
+                    const { _converse } = this;
+                    window._converse = _converse;
+                },
+            });
+
+            converse.initialize({
+                auto_away: 300,
+                avatar_sizes: { message: 48, heading: 44, list: 40, occupant: 32, profile: 56 },
+                dark_theme: 'skin-dark',
+                enable_url_routing: true,
+                fetch_url_headers: true,
+                i18n: 'af',
+                loglevel: 'debug',
+                message_archiving: 'always',
+                muc_show_logs_before_join: true,
+                notify_all_room_messages: ['discuss@conference.conversejs.org'],
+                register_protocol_handler: true,
+                show_background: true,
+                show_controlbox_by_default: true,
+                theme: 'skin-light',
+                whitelisted_plugins: ['converse-debug'],
+                view_mode: 'fullscreen',
+                // bosh_service_url: 'https://conversejs.org/http-bind/', // Please use this connection manager only for testing purposes
+                // websocket_url: 'wss://conversejs.org/xmpp-websocket',
+                // websocket_url: 'ws://chat.example.org:5380/xmpp-websocket',
+                // connection_options: { worker: '/dist/shared-connection-worker.js' }
+            });
+        </script>
+    </body>
+</html>
