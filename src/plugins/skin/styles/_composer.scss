@@ -161,8 +161,13 @@ $skin-control-size: 40px;
         }
 
         // Every layer of the picker paints `--background-color`, so re-pointing it here lifts them all at once.
+        // `--highlight-color(-hover)` is the same story: upstream's generic `.dropdown-menu .selected` rule
+        // (shared/components/styles/dropdown.scss) matches the keyboard-selected `<li>` here too, and only
+        // `converse-dropdown` (not `converse-emoji-dropdown`) gets it re-pointed elsewhere in the skin.
         converse-chat-toolbar converse-emoji-dropdown .dropdown-menu {
             --background-color: var(--skin-surface-raised);
+            --highlight-color: var(--skin-active);
+            --highlight-color-hover: var(--skin-hover);
 
             overflow: hidden;
             padding: 0;
@@ -170,6 +175,39 @@ $skin-control-size: 40px;
             border-radius: var(--skin-radius-md);
             background-color: var(--skin-surface-raised);
             box-shadow: var(--skin-shadow-2);
+
+            // `.toolbar-buttons .btn` above already pills these (the picker is a light-DOM descendant
+            // of the toolbar), so only colour and the accent ring are set here.
+            .emoji-picker__header .emoji-category {
+                // The re-pointed `--highlight-color(-hover)` above still paints this square `<li>`
+                // via upstream's generic `.dropdown-menu .selected` rule; keep it transparent so
+                // only the pill-shaped `<a>` inside carries the tint and ring.
+                background: transparent;
+
+                &.selected a,
+                &:hover a {
+                    background-color: var(--skin-hover);
+                }
+
+                // Upstream fills the picked category with `--heading-color`, a solid black/white chip.
+                // `&.picked:hover` keeps the ring instead of losing it to the plain hover tint above.
+                &.picked a,
+                &.picked:hover a {
+                    background-color: var(--skin-active);
+                    box-shadow: inset 0 -2px 0 var(--skin-accent);
+                }
+
+                a:focus-visible {
+                    outline: none;
+                    box-shadow: 0 0 0 3px var(--skin-focus-ring);
+                }
+
+                &.picked a:focus-visible {
+                    box-shadow:
+                        inset 0 -2px 0 var(--skin-accent),
+                        0 0 0 3px var(--skin-focus-ring);
+                }
+            }
         }
 
         .rich-ac {
