@@ -7,6 +7,7 @@ import { initAvatarSizes } from './avatar-sizes.js';
 import { initBlocklistMenu } from './blocklist-menu.js';
 import { initOccupantsAutohide } from './occupants-autohide.js';
 import { initSidebarToggle } from './sidebar-toggle.js';
+import { initThemeToggle } from './theme-toggle.js';
 import './styles/index.scss';
 
 // Whitelisted through VIEW_PLUGINS so no upstream constant needs editing.
@@ -20,5 +21,6 @@ converse.plugins.add('converse-skin', {
         initBlocklistMenu();
         initOccupantsAutohide();
         initSidebarToggle();
+        initThemeToggle();
     },
 });
