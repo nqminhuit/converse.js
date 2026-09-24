@@ -110,6 +110,17 @@ $skin-paned-app: 'converse-app-chat.converse-embedded, converse-app-chat.convers
         }
     }
 
+    // MUC occupants: upstream's viewport-keyed column classes (col-md-4 col-xl-2) shrink to a
+    // sliver once the skin's list and app switcher eat into the container width. A floor keeps
+    // nicks, role badges and the ☰ usable; `converse-split-resize` still lets the user widen it,
+    // since a dragged inline `width` never beats `min-width`. Left out at $skin-narrow, where the
+    // sidebar becomes the absolute drawer below instead.
+    @container converse (width > #{$skin-narrow}) {
+        #{$skin-paned-app} converse-muc-sidebar {
+            min-width: clamp(240px, 25%, 300px);
+        }
+    }
+
     // Narrow: one pane. The list shows until a chat opens; the chat's existing back arrow
     // (navigateToControlBox) hides the chat again, so no JS is needed.
     @container converse (width <= #{$skin-narrow}) {
