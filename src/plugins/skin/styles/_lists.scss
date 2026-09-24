@@ -25,8 +25,10 @@
         background-color: var(--skin-active);
     }
 
+    // Upstream sets the size on the link itself, so the row's size alone doesn't reach it.
     .list-item-link {
         border-radius: var(--skin-radius-md);
+        font-size: $font-size;
 
         &:focus-visible {
             outline: none;
