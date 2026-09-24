@@ -4,6 +4,7 @@
 import { converse } from '@converse/headless';
 import { VIEW_PLUGINS } from 'shared/constants.js';
 import { initAvatarSizes } from './avatar-sizes.js';
+import { initOccupantsAutohide } from './occupants-autohide.js';
 import './styles/index.scss';
 
 // Whitelisted through VIEW_PLUGINS so no upstream constant needs editing.
@@ -14,5 +15,6 @@ converse.plugins.add('converse-skin', {
 
     initialize() {
         initAvatarSizes();
+        initOccupantsAutohide();
     },
 });
