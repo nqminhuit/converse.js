@@ -1,1 +1,193 @@
 // Owned by T7. See the Skin section in .claude/CLAUDE.md.
+//
+// Layout keys off the chat app's own width (a container query), so an embedded dashboard panel
+// responds to its size rather than the viewport's.
+
+$skin-list-width: 300px;
+$skin-list-width-medium: 240px;
+$skin-touch-target: 40px;
+// App shells laid out as list + chat panes (singleton shows one chat only).
+$skin-paned-app: 'converse-app-chat.converse-embedded, converse-app-chat.converse-fullscreen:not(.converse-singleton)';
+
+@include skin {
+    // The query container is converse-app-chat, not converse-root: modals and toasts are its siblings,
+    // so they never sit inside it. Overlayed mode is left out because it sizes to its content.
+    converse-app-chat.converse-embedded,
+    converse-app-chat.converse-fullscreen {
+        container-type: inline-size;
+        container-name: converse;
+    }
+
+    // Embedded: fill the host container, with no viewport-height assumptions.
+    &.converse-embedded {
+        display: block;
+        height: 100%;
+        --fullpage-chat-height: 100%;
+        --mobile-chat-height: 100%;
+
+        converse-app-container {
+            display: block;
+            height: 100%;
+        }
+    }
+
+    converse-app-chat.converse-embedded {
+        // Upstream sizes embedded boxes like overlayed ones, with an `!important` min-width.
+        // Zeroing the variable lets the panes flex instead.
+        --overlayed-chat-width: 0px;
+        box-sizing: border-box;
+        height: 100%;
+        border: 1px solid var(--skin-border);
+        border-radius: var(--skin-radius-lg);
+        // Clips pane corners to the radius. Popper's fixed dropdowns escape it, since their
+        // containing block is the viewport.
+        overflow: clip;
+    }
+
+    // Panes: a fixed-width list and a chat that takes the rest.
+    #{$skin-paned-app} {
+        flex-wrap: nowrap;
+
+        > .chatbox {
+            position: relative;
+            height: 100%;
+            flex: 1 1 0;
+            min-width: 0;
+            max-width: none;
+            width: auto;
+            margin: 0;
+
+            // Upstream sets the flyout width per viewport breakpoint, some with an id selector or
+            // `!important`; min/max-width outrank width without fighting that specificity.
+            > .box-flyout {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                min-width: 100%;
+                max-width: 100%;
+                height: 100%;
+            }
+        }
+
+        > #controlbox:not(.logged-out) {
+            flex: 0 0 $skin-list-width;
+        }
+
+        > #controlbox.logged-out {
+            flex: 1 1 100%;
+        }
+    }
+
+    // Medium: a narrower list beside the chat.
+    @container converse (width <= #{$skin-medium}) {
+        #{$skin-paned-app} {
+            > #controlbox:not(.logged-out) {
+                flex-basis: $skin-list-width-medium;
+            }
+        }
+    }
+
+    // Wide: cap bubbles so long lines stay readable.
+    @container converse (width > #{$skin-medium}) {
+        .chat-msg__body {
+            max-width: min(75%, 42rem);
+        }
+    }
+
+    // Narrow: one pane. The list shows until a chat opens; the chat's existing back arrow
+    // (navigateToControlBox) hides the chat again, so no JS is needed.
+    @container converse (width <= #{$skin-narrow}) {
+        #{$skin-paned-app} {
+            > #controlbox:not(.logged-out) {
+                flex: 1 1 100%;
+            }
+
+            &:has(> .chatbox:not(#controlbox)) > #controlbox:not(.logged-out) {
+                display: none;
+            }
+
+            .chatbox converse-controlbox-navback {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: auto 0;
+                margin-inline-end: var(--skin-space-2);
+                min-width: $skin-touch-target;
+                min-height: $skin-touch-target;
+                cursor: pointer;
+
+                svg {
+                    fill: var(--chat-header-fg-color);
+                }
+            }
+        }
+
+        // The MUC occupants sidebar becomes a drawer over the chat area. It sits inside the room
+        // body, below the heading, so the heading's occupants toggle stays reachable to close it.
+        converse-muc.chatroom {
+            .chatroom-body {
+                position: relative;
+                flex-wrap: nowrap;
+            }
+
+            .chat-area {
+                display: flex;
+                flex: 1 1 100%;
+                width: 100%;
+                max-width: 100%;
+            }
+
+            converse-split-resize {
+                display: none;
+            }
+
+            converse-muc-sidebar {
+                position: absolute;
+                inset-block: 0;
+                inset-inline-end: 0;
+                z-index: 3;
+                width: min(85%, 280px);
+                max-width: none;
+                flex: none;
+                box-shadow: var(--skin-shadow-2);
+                border-inline-start: 1px solid var(--skin-border);
+            }
+        }
+
+        // The emoji picker is absolutely positioned inside the flyout, which clips it, so keep it
+        // within the pane's width.
+        converse-app-chat .chatbox .chat-toolbar converse-emoji-dropdown .dropdown-menu {
+            min-width: 0;
+            max-width: calc(100cqi - 2 * var(--skin-space-2));
+        }
+
+        converse-emoji-picker {
+            max-width: 100%;
+        }
+
+        // Touch targets.
+        button.chatbox-btn,
+        .chatbox-btn .btn--standalone,
+        .chat-toolbar button,
+        .chat-toolbar .btn,
+        converse-dropdown > .dropdown-toggle,
+        .send-button {
+            min-width: $skin-touch-target;
+            min-height: $skin-touch-target;
+            justify-content: center;
+        }
+
+        .list-item {
+            min-height: $skin-touch-target;
+            align-items: center;
+        }
+
+        .dropdown-item {
+            min-height: $skin-touch-target;
+        }
+
+        .bottom-panel {
+            padding-bottom: env(safe-area-inset-bottom, 0);
+        }
+    }
+}
