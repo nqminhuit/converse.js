@@ -1,1 +1,246 @@
 // Owned by T5. See the Skin section in .claude/CLAUDE.md.
+// Scoped to the roster, rooms list and occupant list: disco and bookmark modals reuse `.items-list`.
+
+// Shared row look: inset, rounded, highlighted on hover and when open.
+@mixin skin-list-row($font-size: var(--skin-font-size)) {
+    height: auto;
+    margin: 1px var(--skin-space-2);
+    padding: var(--skin-space-2) var(--skin-space-3);
+    border-radius: var(--skin-radius-md);
+    background-color: transparent;
+    color: var(--foreground-color);
+    font-size: $font-size;
+
+    &:hover,
+    &:focus-within {
+        background-color: var(--skin-hover);
+
+        .list-item-action {
+            opacity: 1;
+        }
+    }
+
+    &.open,
+    &.open:hover {
+        background-color: var(--skin-active);
+    }
+
+    .list-item-link {
+        border-radius: var(--skin-radius-md);
+
+        &:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 3px var(--skin-focus-ring);
+        }
+    }
+}
+
+// Unread count as an accent pill; the empty "activity" badge becomes a dot.
+@mixin skin-unread-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 0.4rem;
+    border-radius: var(--skin-radius-pill);
+    background-color: var(--skin-accent);
+    color: var(--skin-accent-contrast);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+
+    &:empty {
+        min-width: 0;
+        width: var(--skin-space-2);
+        height: var(--skin-space-2);
+        padding: 0;
+    }
+}
+
+// Quiet section label. Upstream forces the colour with `!important` via --chat-color / --muc-color,
+// so the label redefines those variables instead of fighting it.
+@mixin skin-group-label {
+    display: flex;
+    align-items: center;
+    gap: var(--skin-space-1);
+    margin: var(--skin-space-3) 0 var(--skin-space-1);
+    padding: 0 var(--skin-space-4);
+    font-family: var(--skin-font);
+    font-size: var(--skin-font-size-sm);
+    font-weight: 600;
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+}
+
+@include skin {
+    // Roster: current, pending, requesting and unsaved contacts share the same row markup.
+    #converse-roster .roster-contacts {
+        .group-toggle {
+            --chat-color: var(--skin-muted-text);
+            --chat-color-hover: var(--foreground-color);
+
+            @include skin-group-label;
+        }
+
+        .roster-group-contacts .list-item {
+            align-items: center;
+
+            @include skin-list-row;
+        }
+
+        converse-roster-contact {
+            align-items: center;
+            gap: var(--skin-space-2);
+
+            .open-chat {
+                display: flex;
+                align-items: center;
+                gap: var(--skin-space-3);
+                min-width: 0;
+
+                > span:first-child {
+                    flex: none;
+                }
+
+                .contact-name,
+                .contact-name.unread-msgs,
+                .contact-name.contact-name--offline {
+                    flex: 1 1 auto;
+                    order: 1;
+                    min-width: 0;
+                    max-width: none;
+                    width: auto;
+                    height: auto;
+                    margin-inline-start: 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .msgs-indicator {
+                    order: 2;
+                    flex: none;
+                    margin-inline: auto 0;
+
+                    @include skin-unread-badge;
+                }
+
+                &.unread-msgs {
+                    color: var(--foreground-color);
+                    font-weight: 600;
+                }
+            }
+        }
+    }
+
+    // Rooms list
+    #chatrooms {
+        .muc-domain-group-toggle {
+            --muc-color: var(--skin-muted-text);
+            --muc-color-hover: var(--foreground-color);
+
+            @include skin-group-label;
+        }
+
+        converse-rooms-list .items-list .list-item {
+            align-items: center;
+
+            @include skin-list-row;
+
+            .open-room {
+                align-items: center;
+                gap: var(--skin-space-3);
+                height: auto;
+                min-width: 0;
+                padding: 0;
+                line-height: var(--line-height);
+
+                // The gap spaces the avatar; drop upstream's `.avatar-muc` margin.
+                converse-avatar {
+                    flex: none;
+                    margin-inline-end: 0;
+                }
+
+                > span {
+                    display: block;
+                    flex: 1 1 auto;
+                    min-width: 0;
+                    padding-top: 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .msgs-indicator {
+                    float: inline-end;
+                    margin-inline-start: var(--skin-space-2);
+                    margin-top: 0.1rem;
+
+                    @include skin-unread-badge;
+                }
+            }
+
+            &.unread-msgs .open-room {
+                font-weight: 600;
+            }
+        }
+    }
+
+    // MUC occupants
+    converse-muc-occupants .occupants .items-list {
+        &.occupant-list {
+            padding: var(--skin-space-1) 0;
+        }
+
+        .list-item.occupant {
+            @include skin-list-row(var(--skin-font-size-sm));
+
+            .occupant-nick-badge {
+                padding-inline-start: var(--skin-space-2);
+            }
+
+            // Colour and shape only: upstream positions this badge over the avatar.
+            .msgs-indicator {
+                @include skin-unread-badge;
+            }
+        }
+    }
+
+    // Roster and occupant filters
+    converse-list-filter .items-filter-form {
+        .filter-by {
+            gap: var(--skin-space-1);
+
+            converse-icon {
+                border-radius: var(--skin-radius-sm);
+
+                &.selected {
+                    background-color: var(--skin-accent-soft);
+                }
+            }
+        }
+
+        .items-filter,
+        select.state-type {
+            margin: var(--skin-space-1) 0;
+            padding: var(--skin-space-2) var(--skin-space-4);
+            border: 1px solid transparent;
+            border-radius: var(--skin-radius-pill);
+            background-color: var(--skin-surface-sunken);
+            color: var(--foreground-color);
+            font-size: var(--skin-font-size-sm);
+            box-shadow: none;
+
+            &::placeholder {
+                color: var(--skin-muted-text);
+            }
+
+            &:focus {
+                border-color: var(--skin-accent);
+                box-shadow: 0 0 0 3px var(--skin-focus-ring);
+                outline: none;
+            }
+        }
+    }
+}
