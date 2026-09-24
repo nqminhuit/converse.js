@@ -153,7 +153,8 @@ viewer for the rest of the session. The choice is stored in `localStorage` under
 `converse-skin-theme`, which is scoped per origin: on a page that embeds converse.js in an iframe
 (e.g. a dashboard) alongside a standalone page on the same origin, both share the stored choice, since
 `localStorage` is keyed by origin, not by frame. Set to `false` to disable, in which case no button
-shows and no stored choice is applied.
+shows and no stored choice is applied. A page that pins `theme` and `dark_theme` to the same value
+(e.g. the dashboard embed) gets no toggle either, and ignores whatever the standalone page stored.
 
 ### Blocklist menu
 
