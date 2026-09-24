@@ -76,6 +76,16 @@
     text-decoration: none;
 }
 
+// Correctness, not look, so it applies under any theme, not just `@include skin`.
+// The "Show block list" item has no class of its own; keyed to its icon and scoped to the
+// contacts dropdown so it doesn't also hit the rooms list's "List rooms" item, which reuses the icon.
+converse-root[data-skin-no-blocking]
+    #converse-roster
+    converse-dropdown.dropdown--contacts
+    .dropdown-item:has(> converse-icon.fa-list-ul) {
+    display: none;
+}
+
 @include skin {
     // Roster: current, pending, requesting and unsaved contacts share the same row markup.
     #converse-roster .roster-contacts {

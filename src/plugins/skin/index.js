@@ -4,6 +4,7 @@
 import { converse } from '@converse/headless';
 import { VIEW_PLUGINS } from 'shared/constants.js';
 import { initAvatarSizes } from './avatar-sizes.js';
+import { initBlocklistMenu } from './blocklist-menu.js';
 import { initOccupantsAutohide } from './occupants-autohide.js';
 import { initSidebarToggle } from './sidebar-toggle.js';
 import './styles/index.scss';
@@ -16,6 +17,7 @@ converse.plugins.add('converse-skin', {
 
     initialize() {
         initAvatarSizes();
+        initBlocklistMenu();
         initOccupantsAutohide();
         initSidebarToggle();
     },
