@@ -1,1 +1,195 @@
 // Owned by T4. See the Skin section in .claude/CLAUDE.md.
+// Composer: the 1:1, MUC and MUC-occupant message forms, the reply preview and the composer's popovers.
+
+$skin-control-size: 40px;
+
+@mixin skin-field {
+    border: 1px solid transparent;
+    border-radius: var(--skin-radius-lg);
+    background-color: var(--skin-surface-sunken);
+    color: var(--foreground-color);
+
+    &:focus,
+    &:focus-within {
+        box-shadow: 0 0 0 3px var(--skin-focus-ring);
+    }
+}
+
+.chatbox .bottom-panel {
+    @include skin {
+        // The coloured context bars give way to a hairline. `!important` only because upstream's MUC
+        // form sets its border-top that way.
+        form.chat-message-form {
+            border: 0 !important;
+            border-top: 1px solid var(--skin-border) !important;
+            border-radius: 0;
+            padding: var(--skin-space-2) var(--skin-space-3) var(--skin-space-3);
+            background-color: var(--skin-surface);
+
+            .chat-rich .chat-textarea.chat-rich__editable {
+                @include skin-field;
+
+                // Upstream's MUC outline is `!important` and paints over the inner edge of the focus ring.
+                outline: none !important;
+                min-height: $skin-control-size;
+                margin: 0;
+                padding: var(--skin-space-2) var(--skin-space-3);
+                font-size: var(--skin-font-size);
+
+                &.correcting {
+                    background-image: linear-gradient(var(--skin-accent-soft), var(--skin-accent-soft));
+                    border-color: var(--skin-accent);
+                }
+            }
+
+            input.spoiler-hint {
+                @include skin-field;
+
+                outline: none !important;
+                margin-bottom: var(--skin-space-2);
+                padding: var(--skin-space-1) var(--skin-space-3);
+            }
+
+            .chat-toolbar.btn-toolbar {
+                // Neutral accent: the glyphs, limit counter and upstream's hover plate all read it.
+                --toolbar-accent: var(--skin-muted-text);
+
+                align-items: center;
+                padding: 0 0 var(--skin-space-2);
+                background-color: transparent;
+
+                // converse-icon writes its fill inline, so only `!important` reaches it.
+                .toolbar-buttons converse-icon svg {
+                    fill: var(--skin-muted-text) !important;
+                }
+
+                .toolbar-buttons .btn:hover converse-icon svg,
+                .toolbar-buttons .btn:focus-visible converse-icon svg {
+                    fill: var(--skin-accent) !important;
+                }
+
+                .toolbar-buttons .btn {
+                    border-radius: var(--skin-radius-pill);
+                }
+
+                .send-button {
+                    --converse-btn-color: var(--skin-accent-contrast);
+                    --converse-btn-bg: var(--skin-accent);
+                    --converse-btn-border-color: var(--skin-accent);
+                    --converse-btn-hover-color: var(--skin-accent-contrast);
+                    --converse-btn-hover-bg: color-mix(in srgb, var(--skin-accent) 85%, var(--foreground-color));
+                    --converse-btn-hover-border-color: var(--converse-btn-hover-bg);
+                    --converse-btn-active-bg: color-mix(in srgb, var(--skin-accent) 72%, var(--foreground-color));
+                    --converse-btn-active-border-color: var(--converse-btn-active-bg);
+
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: $skin-control-size;
+                    height: $skin-control-size;
+                    padding: 0;
+                    border-radius: var(--skin-radius-pill);
+                    box-shadow: var(--skin-shadow-1);
+
+                    &:focus-visible {
+                        box-shadow: 0 0 0 3px var(--skin-focus-ring);
+                    }
+
+                    converse-icon svg {
+                        fill: var(--skin-accent-contrast) !important;
+                    }
+                }
+            }
+        }
+
+        converse-reply-preview .reply-preview {
+            margin: var(--skin-space-2) var(--skin-space-3) 0;
+            padding: var(--skin-space-2) var(--skin-space-3);
+            border: 1px solid var(--skin-border);
+            border-inline-start: 3px solid var(--skin-accent);
+            border-radius: var(--skin-radius-md);
+            background-color: var(--skin-surface-raised);
+            box-shadow: none;
+
+            .reply-preview__sender {
+                color: var(--skin-accent);
+            }
+
+            .reply-preview__text {
+                color: var(--skin-muted-text);
+                opacity: 1;
+            }
+
+            .reply-preview__cancel {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 28px;
+                height: 28px;
+                padding: 0;
+                border-radius: var(--skin-radius-pill);
+                color: var(--skin-muted-text);
+                opacity: 1;
+
+                &:hover {
+                    background-color: var(--skin-hover);
+                    color: var(--foreground-color);
+                }
+
+                converse-icon svg {
+                    fill: currentColor;
+                }
+            }
+        }
+
+        // With a reply pending, the preview and the form read as one block: the hairline moves above the preview.
+        &:has(> converse-reply-preview .reply-preview) {
+            > converse-reply-preview:has(.reply-preview) {
+                border-top: 1px solid var(--skin-border);
+                background-color: var(--skin-surface);
+            }
+
+            form.chat-message-form {
+                border-top-color: transparent !important;
+            }
+        }
+
+        // Every layer of the picker paints `--background-color`, so re-pointing it here lifts them all at once.
+        converse-chat-toolbar converse-emoji-dropdown .dropdown-menu {
+            --background-color: var(--skin-surface-raised);
+
+            overflow: hidden;
+            padding: 0;
+            border: 1px solid var(--skin-border);
+            border-radius: var(--skin-radius-md);
+            background-color: var(--skin-surface-raised);
+            box-shadow: var(--skin-shadow-2);
+        }
+
+        .rich-ac {
+            padding: var(--skin-space-1);
+            border: 1px solid var(--skin-border);
+            border-radius: var(--skin-radius-md);
+            background-color: var(--skin-surface-raised);
+            box-shadow: var(--skin-shadow-2);
+
+            .rich-ac__item {
+                border-radius: var(--skin-radius-sm);
+
+                &:hover {
+                    background-color: var(--skin-hover);
+                    color: var(--foreground-color);
+                }
+
+                &.is-active {
+                    background-color: var(--skin-active);
+                    color: var(--foreground-color);
+                }
+
+                .rich-ac__detail {
+                    color: var(--skin-muted-text);
+                }
+            }
+        }
+    }
+}
