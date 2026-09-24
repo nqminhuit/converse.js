@@ -41,12 +41,15 @@ function isSidebarHidden(controlbox) {
 
 /**
  * Reflects the flag onto `converse-root` as a data attribute, which `_responsive.scss` reads to
- * hide `#controlbox` and let the open chat fill the pane.
+ * hide `#controlbox` and let the open chat fill the pane. Left off while logged out (the flag can
+ * be stale from a previous session and would otherwise hide the login form) or while the setting
+ * is disabled (there'd be no button left to clear it).
  * @param {import('@converse/headless').Model} [controlbox]
  */
 function reflectAttribute(controlbox) {
     const root = document.querySelector('converse-root');
-    root?.toggleAttribute('data-skin-sidebar-hidden', isSidebarHidden(controlbox));
+    const show = !!api.settings.get(SETTING) && !!controlbox?.get('connected') && isSidebarHidden(controlbox);
+    root?.toggleAttribute('data-skin-sidebar-hidden', show);
 }
 
 /**
@@ -123,5 +126,8 @@ export function initSidebarToggle() {
             reflectAttribute(getControlBox());
             refreshHeadings();
         });
+        // Logout/login toggles `connected` without closing any chatbox, so the attribute needs
+        // its own listener to clear (or restore) alongside the flag.
+        _converse.state.chatboxes.on('change:connected', () => reflectAttribute(getControlBox()));
     });
 }
