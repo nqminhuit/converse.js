@@ -117,4 +117,16 @@ describe('The occupant list auto-hide', function () {
             expect(_converse.state.chatboxes.get(MUC_JID).get('hidden_occupants')).toBe(false);
         }),
     );
+
+    it(
+        // Regression test for #166: upstream's viewport-keyed column classes squeezed this to
+        // roughly 140px at 1200px wide before _responsive.scss gave it a floor.
+        'keeps the occupants sidebar at least 240px wide at 1200px',
+        mock.initConverse(converse, [], skin, async (_converse) => {
+            await mock.openAndEnterMUC(_converse, MUC_JID, 'romeo');
+            await resize(await getChatApp(), '1200px');
+            const sidebar = await u.waitUntil(() => document.querySelector('converse-muc-sidebar'));
+            expect(parseFloat(getComputedStyle(sidebar).width)).toBeGreaterThanOrEqual(240);
+        }),
+    );
 });
