@@ -1,4 +1,4 @@
-// Placeholder copy of upstream themes/dracula.scss; T2 replaces the values.
+// Skin dark theme: same variable names as upstream themes/classic.scss (no fallback between themes).
 &[data-converse-theme='skin-dark'],
 &[data-bs-theme='skin-dark'] {
     $theme: 'skin-dark' !default;
@@ -7,43 +7,47 @@
 
     // Hex color values
     // ----------------
-    --cyan: #8be9fd;
-    --green: #50fa7b;
-    --green-rgb: 80, 250, 123;
-    --orange: #ffb86c;
-    --orange-rgb: 255, 184, 108;
-    --pink: #ff79c6;
-    --pink-rgb: 255, 121, 198;
-    --purple: #bd93f9;
-    --purple-rgb: 189, 147, 249;
-    --red: #ff5555;
-    --red-rgb: 255, 85, 85;
-    --yellow: #f1fa8c;
-    --yellow-rgb: 241, 250, 140;
-    --gray: #6272a4;
-    --darkgray: #212529;
+    // The classic palette names are kept so upstream rules still resolve; `--blue` is the skin accent,
+    // lightened so it reads on the dark panels. Filled accents therefore take dark text.
+    --blue: #8b9dff;
+    --blue-rgb: 139, 157, 255;
+    --dark-blue: #a5b3ff;
+    --dark-green: #4cc98a;
+    --dark-green-rgb: 76, 201, 138;
+    --red: #ff6b6b;
+    --red-rgb: 255, 107, 107;
+    --gray: #9aa1b1;
+    --green: #3ecf7c;
+    --green-rgb: 62, 207, 124;
+    --light-blue: #aab3c5;
+    --light-blue-rgb: 170, 179, 197;
+    --lighter-blue: #252b3d;
+    --orange: #f5a524;
+    --orange-rgb: 245, 165, 36;
+    --redder-orange: #fb8a4c;
+    --redder-orange-rgb: 251, 138, 76;
 
     // Base variables
     // --------------
-    --background-color: #282a36;
-    --background-color-rgb: 40, 42, 54;
-    --foreground-color: #f8f8f2;
+    --foreground-color: #e6e8ee;
+    --background-color: #171a21;
+    --background-color-rgb: 23, 26, 33;
 
-    --chat-rgb: var(--green-rgb);
-    --muc-rgb: var(--orange-rgb);
+    --chat-rgb: var(--blue-rgb);
+    --muc-rgb: var(--blue-rgb);
 
     // Bootstrap variables
-    --primary-color: var(--pink) !important;
-    --primary-rgb: var(--pink-rgb);
-    --secondary-color: var(--purple) !important;
-    --secondary-rgb: var(--purple-rgb);
+    --primary-color: var(--blue) !important;
+    --primary-rgb: var(--blue-rgb);
+    --secondary-color: var(--light-blue) !important;
+    --secondary-rgb: var(--light-blue-rgb);
     --success-color: var(--green);
     --success-color-rgb: var(--green-rgb);
     --danger-color: var(--red);
     --danger-color-rgb: var(--red-rgb);
     --warning-color: var(--orange);
-    --info-color: var(--yellow);
-    --info-color-rgb: var(--yellow-rgb);
+    --info-color: var(--light-blue);
+    --info-color-rgb: var(--light-blue-rgb);
 
     --converse-info: var(--info-color);
     --converse-info-rgb: var(--info-color-rgb);
@@ -57,12 +61,12 @@
     --converse-body-bg-rgb: var(--background-color-rgb);
     --converse-body-bg: var(--background-color);
     --converse-body-color: var(--foreground-color) !important;
-    --converse-highlight-color: var(--yellow) !important;
+    --converse-highlight-color: var(--blue) !important;
     --converse-secondary-color: var(--secondary-color);
 
     .form-check-input:checked {
-        background-color: var(--purple);
-        border-color: var(--purple);
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
     }
     .navbar-nav {
         --converse-nav-link-color: var(--link-color) !important;
@@ -79,6 +83,8 @@
         --converse-list-group-color: var(--foreground-color);
         &.active {
             --converse-list-group-active-color: var(--background-color) !important;
+            --converse-list-group-active-bg: var(--primary-color) !important;
+            --converse-list-group-active-border-color: var(--primary-color) !important;
         }
     }
     .toast {
@@ -89,52 +95,61 @@
     // Online status indicators
     --chat-status-away: var(--orange);
     --chat-status-busy: var(--red);
-    --chat-status-offline: var(--gray);
+    --chat-status-offline: #6b7282;
     --chat-status-online: var(--green);
 
-    --controlbox-color: var(--purple);
-    --disabled-color: var(--gray);
+    --controlbox-color: var(--blue);
+    --disabled-color: #6b7282;
     --error-color: var(--red);
-    --focus-color: var(--pink);
-    --heading-color: var(--purple);
-    --link-color: var(--cyan);
+    --focus-color: var(--blue);
+    --heading-color: var(--foreground-color);
+    --link-color: var(--blue);
     --subdued-color: var(--gray);
 
     // The background when selecting text with your mouse
-    --selection-color: black;
+    --selection-color: #3a4680;
 
     // Used to indicate selected or open items in lists.
-    --highlight-color: var(--gray);
-    --highlight-color-hover: var(--darkgray);
+    --highlight-color: var(--lighter-blue);
+    --highlight-color-hover: #2c3348;
 
     // 1:1 Chat-related colors
-    --chat-color: var(--green);
-    --chat-header-fg-color: var(--chat-color);
-    // The page grey is readable on this header but sits low against it, so
-    // lighten it toward the theme's own text colour. Neutral either way, which
-    // is the point: the name above it carries the theme's colour.
-    --chat-header-subdued-color: color-mix(in srgb, var(--subdued-color) 60%, var(--foreground-color));
+    // Heads are neutral panels; T8 draws the edge, and the name carries the text colour.
+    --chat-color: var(--blue);
+    --chat-header-fg-color: var(--foreground-color);
+    --chat-header-subdued-color: var(--subdued-color);
     --chat-header-bg-color: var(--background-color);
 
     // MUC-related colors
-    --muc-color: var(--orange);
-    --muc-header-fg-color: var(--muc-color);
+    --muc-color: var(--blue);
+    --muc-header-fg-color: var(--foreground-color);
     --muc-header-bg-color: var(--background-color);
 
     // 1:1 headlines-related colors
-    --headlines-color: var(--pink);
-    --headlines-header-fg-color: var(--headlines-color);
+    --headlines-color: var(--orange);
+    --headlines-header-fg-color: var(--foreground-color);
     --headlines-header-bg-color: var(--background-color);
 
     // Derived colors
     // --------------
-    --brand-heading-color: var(--cyan);
-    --chat-color-hover: var(--chat-color);
-    --danger-color-hover: var(--danger-color);
-    --global-background-color: var(--background-color);
-    --link-color-hover: var(--link-color);
-    --muc-color-hover: var(--muc-color);
-    --primary-color-hover: var(--purple);
-    --secondary-color-hover: var(--secondary-color);
-    --warning-color-hover: var(--orange);
+    --brand-heading-color: var(--blue);
+    --chat-color-hover: var(--dark-blue);
+    --danger-color-hover: #ff8a8a;
+    --global-background-color: #0f1115;
+    --link-color-hover: var(--dark-blue);
+    --muc-color-hover: var(--dark-blue);
+    --primary-color-hover: var(--dark-blue);
+    --secondary-color-hover: #c2c9d6;
+    --warning-color-hover: #f7b84d;
+
+    // Skin contract overrides: white on the light accent fails contrast, so the "me" bubble is a
+    // deeper blue with white text and other accent fills take the panel colour as text.
+    --skin-surface-raised: #1f232c;
+    --skin-surface-sunken: #111318;
+    --skin-border: #2a2f3a;
+    --skin-bubble-them: #232733;
+    --skin-bubble-me: #4560e0;
+    --skin-bubble-me-text: #ffffff;
+    --skin-accent-contrast: var(--background-color);
+    --skin-muted-text: var(--subdued-color);
 }
