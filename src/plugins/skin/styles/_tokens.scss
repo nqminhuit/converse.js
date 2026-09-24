@@ -31,8 +31,8 @@ converse-bg {
         --skin-bubble-me: var(--skin-accent);
         --skin-bubble-me-text: var(--skin-accent-contrast);
         --skin-muted-text: color-mix(in srgb, var(--foreground-color) 65%, var(--background-color));
-        // A colour, used as `box-shadow: 0 0 0 3px var(--skin-focus-ring)`.
-        --skin-focus-ring: color-mix(in srgb, var(--primary-color) 40%, transparent);
+        // A colour, used as `box-shadow: 0 0 0 3px var(--skin-focus-ring)`. 75% keeps it >= 3:1 on every skin surface.
+        --skin-focus-ring: color-mix(in srgb, var(--primary-color) 75%, transparent);
 
         // Shape (<length>)
         --skin-radius-sm: 6px;

@@ -49,7 +49,9 @@ function onResize(entries) {
         const was_narrow = narrow_state.get(target);
         narrow_state.set(target, is_narrow);
         if (is_narrow && was_narrow === false && isSkinned(target)) {
-            _converse.state.chatboxes.filter((c) => c.get('type') === CHATROOMS_TYPE).forEach(collapse);
+            _converse.state.chatboxes
+                .filter(/** @param {import('@converse/headless').MUC} c */ (c) => c.get('type') === CHATROOMS_TYPE)
+                .forEach(collapse);
         }
     }
 }
