@@ -1,1 +1,88 @@
 // Owned by T6. See the Skin section in .claude/CLAUDE.md.
+// Only this partial adds motion, all of it behind a reduced-motion check.
+// Enter effects use the individual `translate`/`scale` properties so they compose with any `transform` set
+// elsewhere. Dropdowns only translate: `scale` would also scale Popper's inline translate and make them swoop.
+
+@media (prefers-reduced-motion: no-preference) {
+    @keyframes skin-msg-in {
+        from {
+            opacity: 0;
+            translate: 0 0.5rem;
+        }
+    }
+
+    @keyframes skin-drop-in {
+        from {
+            opacity: 0;
+            translate: 0 -0.25rem;
+        }
+    }
+
+    @keyframes skin-drop-up {
+        from {
+            opacity: 0;
+            translate: 0 0.25rem;
+        }
+    }
+
+    @include skin {
+        // Paint-only state changes (hover, active, focus) on interactive surfaces.
+        .btn,
+        button,
+        .dropdown-item,
+        .list-item,
+        .list-item-link,
+        .chat-msg,
+        .chat-msg__body,
+        .chat-message-form,
+        .chat-message-form .chat-rich,
+        .chat-textarea {
+            transition-property: background-color, border-color, color, box-shadow, transform;
+            transition-duration: var(--skin-dur-fast);
+            transition-timing-function: var(--skin-ease);
+        }
+
+        // Message actions are revealed with opacity; restated deep enough to beat the `button` rule above.
+        converse-message-actions,
+        converse-message-actions .chat-msg__actions,
+        converse-message-actions .chat-msg__actions .btn--standalone {
+            transition-property: opacity, background-color, color, box-shadow, transform;
+            transition-duration: var(--skin-dur-fast);
+            transition-timing-function: var(--skin-ease);
+        }
+
+        // Only the newest message animates, so chat switches and history paging don't replay it on every row.
+        converse-message-history > converse-chat-message:last-child .message.chat-msg {
+            animation: skin-msg-in var(--skin-dur) var(--skin-ease);
+
+            // Keep upstream's highlight running alongside; a name already in the list isn't restarted.
+            &.chat-msg--highlighted {
+                animation:
+                    skin-msg-in var(--skin-dur) var(--skin-ease),
+                    highlight-message 2s ease-out;
+            }
+        }
+
+        // Bootstrap drives modals with transitions and waits on their end events, so retune those
+        // rather than adding a keyframe animation.
+        .modal.fade {
+            transition: opacity var(--skin-dur) var(--skin-ease);
+
+            .modal-dialog {
+                transform: scale(0.96);
+                transition: transform var(--skin-dur) var(--skin-ease);
+            }
+        }
+        .modal.fade.show .modal-dialog {
+            transform: none;
+        }
+
+        .dropdown-menu.show {
+            animation: skin-drop-in var(--skin-dur-fast) var(--skin-ease);
+
+            &[data-popper-placement^='top'] {
+                animation-name: skin-drop-up;
+            }
+        }
+    }
+}
