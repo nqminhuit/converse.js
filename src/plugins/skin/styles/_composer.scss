@@ -143,10 +143,8 @@ $skin-control-size: 40px;
         }
 
         // Upstream renders the preview in both the panel and the form it wraps, under the same condition.
-        // Keep the panel's copy; the occupant panel has no copy of its own, so its form keeps one.
-        &:is(converse-chat-bottom-panel, converse-muc-bottom-panel)
-            > :is(converse-message-form, converse-muc-message-form)
-            > converse-reply-preview {
+        // Hide the form's copy only while the panel has its own, so an upstream fix can't hide both.
+        &:has(> converse-reply-preview) > :is(converse-message-form, converse-muc-message-form) > converse-reply-preview {
             display: none;
         }
 

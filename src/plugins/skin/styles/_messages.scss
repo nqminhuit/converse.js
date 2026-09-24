@@ -237,8 +237,9 @@ $skin-own-1to1: 'converse-chat .message.chat-msg:has(> .chat-msg__content--me):n
     #{$skin-own-1to1} {
         flex-direction: row-reverse;
 
+        // The leading gutter mirrors the other side's avatar column, so wrapped bubbles don't run under it.
         .chat-msg__content {
-            margin-inline-start: 0;
+            margin-inline-start: calc(var(--skin-avatar-message, 44px) + 0.5rem);
             margin-inline-end: 0.5rem;
         }
 
@@ -261,7 +262,7 @@ $skin-own-1to1: 'converse-chat .message.chat-msg:has(> .chat-msg__content--me):n
 
     #{$skin-own-1to1}.chat-msg--followup {
         &.chat-msg--with-avatar .chat-msg__content {
-            margin-inline-start: 0;
+            margin-inline-start: calc(var(--skin-avatar-message, 44px) + 0.5rem);
             margin-inline-end: calc(var(--skin-avatar-message, 44px) + 0.5rem);
         }
 
