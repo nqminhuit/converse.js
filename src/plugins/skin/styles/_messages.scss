@@ -1,1 +1,306 @@
 // Owned by T3. See the Skin section in .claude/CLAUDE.md.
+// Message bubbles, headers, separators, the message-actions pill, reply context, reactions and unfurls.
+
+// Own messages in a 1:1 chat (MUCs stay left-aligned). `/me` and retracted lines stay plain.
+$skin-own-1to1: 'converse-chat .message.chat-msg:has(> .chat-msg__content--me):not(.chat-msg--action)';
+
+@include skin {
+    // Rows and rhythm: a bubble carries the highlight, so the row itself no longer does.
+    .message.chat-msg {
+        padding: var(--skin-space-2) var(--skin-space-4) var(--skin-space-1);
+
+        &.chat-msg--followup {
+            padding-top: 0;
+        }
+
+        &:not(.chat-msg--unencrypted):not(.correcting):hover {
+            background-color: transparent;
+        }
+
+        // Header: author name, hats, then a muted time and padlock on one baseline.
+        .chat-msg__heading {
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: var(--skin-space-1) var(--skin-space-2);
+            margin-bottom: var(--skin-space-1);
+            padding-inline-end: 0;
+
+            .badge {
+                margin-inline-start: 0;
+                font-size: var(--skin-font-size-sm);
+                font-weight: 500;
+            }
+
+            .chat-msg__time {
+                padding-inline: 0;
+                color: var(--skin-muted-text);
+                font-size: var(--skin-font-size-sm);
+            }
+
+            .fa-lock svg {
+                fill: var(--skin-muted-text);
+            }
+        }
+
+        .chat-msg__author {
+            min-width: 0;
+            font-family: var(--skin-font);
+            font-size: var(--skin-font-size);
+            font-weight: 600;
+            padding-bottom: 0;
+        }
+
+        // Bubbles. No max-width here: the width cap belongs to _responsive.scss.
+        &:not(.chat-msg--action) .chat-msg__body {
+            align-self: flex-start;
+            padding: var(--skin-space-2) var(--skin-space-3);
+            border-radius: var(--skin-bubble-radius);
+            background-color: var(--skin-bubble-them);
+            box-shadow: var(--skin-shadow-1);
+
+            // Emoji-only messages read better without a bubble.
+            &:has(.chat-msg__text--larger) {
+                padding: 0;
+                background-color: transparent;
+                box-shadow: none;
+            }
+        }
+
+        // Follow-ups tuck in on the side facing the avatar.
+        &.chat-msg--followup:not(.chat-msg--action) .chat-msg__body {
+            border-start-start-radius: var(--skin-radius-sm);
+            border-end-start-radius: var(--skin-radius-sm);
+        }
+
+        .chat-msg__message {
+            line-height: 1.4;
+        }
+
+        // "Me" bubbles. The chain outranks upstream's `.chat-msg__text` colours, including the MUC
+        // pending and delayed states, which would otherwise put secondary text on the accent fill.
+        &:not(.chat-msg--action) .chat-msg__content--me .chat-msg__body {
+            background-color: var(--skin-bubble-me);
+            color: var(--skin-bubble-me-text);
+
+            .chat-msg__message .chat-msg__body--wrapper .chat-msg__text,
+            .chat-msg__message .chat-msg__subject,
+            .chat-msg__message .spoiler-hint {
+                color: var(--skin-bubble-me-text);
+            }
+
+            a,
+            .mention,
+            code {
+                color: var(--skin-bubble-me-text);
+            }
+
+            a {
+                text-decoration: underline;
+            }
+
+            // Secondary text on the accent fill, derived from the bubble text so it keeps contrast.
+            blockquote,
+            .styling-directive,
+            .chat-msg__time {
+                color: color-mix(in srgb, var(--skin-bubble-me-text) 75%, transparent);
+            }
+
+            blockquote {
+                border-inline-start-color: currentColor;
+            }
+
+            .chat-msg__receipt svg,
+            .chat-msg__edit-modal svg {
+                fill: currentColor;
+            }
+
+            // A MUC message not yet reflected by the server gets a soft bubble rather than faded text.
+            &.chat-msg__body--groupchat:not(.chat-msg__body--received):not(.chat-msg__body--delayed) {
+                background-color: var(--skin-accent-soft);
+                color: var(--foreground-color);
+
+                .chat-msg__message .chat-msg__body--wrapper .chat-msg__text,
+                .chat-msg__message .chat-msg__subject,
+                .chat-msg__message .spoiler-hint,
+                a,
+                .mention,
+                code {
+                    color: var(--foreground-color);
+                }
+
+                blockquote,
+                .styling-directive,
+                .chat-msg__time {
+                    color: var(--skin-muted-text);
+                }
+            }
+
+            &:has(.chat-msg__text--larger) {
+                background-color: transparent;
+            }
+        }
+
+        // Reply context above the bubble.
+        .chat-msg__reply-context {
+            margin-bottom: var(--skin-space-1);
+            padding: var(--skin-space-1) var(--skin-space-2);
+            background-color: var(--skin-surface-sunken);
+            border-left-color: var(--skin-accent);
+            border-radius: 0 var(--skin-radius-sm) var(--skin-radius-sm) 0;
+
+            &:hover {
+                background-color: var(--skin-hover);
+            }
+
+            .chat-msg__reply-sender {
+                color: var(--skin-accent);
+            }
+        }
+
+        // Reactions.
+        .chat-msg__reactions {
+            gap: var(--skin-space-1);
+            margin-top: var(--skin-space-1);
+        }
+
+        .chat-msg__reaction {
+            background: var(--skin-surface-raised);
+            border-color: var(--skin-border);
+            color: var(--foreground-color);
+
+            &:hover {
+                background: var(--skin-hover);
+            }
+
+            &.reacted {
+                background: var(--skin-accent-soft);
+                border-color: var(--skin-accent);
+            }
+        }
+
+        // Link-preview cards.
+        converse-message-unfurl .card.card--unfurl {
+            margin-block: var(--skin-space-1);
+            overflow: hidden;
+            background-color: var(--skin-surface-raised);
+            border: 1px solid var(--skin-border);
+            border-radius: var(--skin-radius-md);
+            box-shadow: var(--skin-shadow-1);
+
+            .card-body {
+                padding: var(--skin-space-2) var(--skin-space-3);
+            }
+
+            .card-text {
+                margin-bottom: var(--skin-space-1);
+            }
+        }
+    }
+
+    // Message actions: a floating pill over the bubble's top corner, revealed on hover or focus.
+    // Hidden with opacity only, so its buttons stay focusable and _motion.scss can fade it.
+    .message.chat-msg converse-message-actions {
+        position: absolute;
+        top: calc(-1 * var(--skin-space-4));
+        inset-inline-end: var(--skin-space-2);
+        z-index: 3;
+        margin-inline-start: 0;
+        opacity: 0;
+
+        // The reactions plugin always appends its picker, so key the pill chrome on the menu.
+        &:has(.chat-msg__actions) {
+            display: flex;
+            align-items: center;
+            gap: var(--skin-space-1);
+            padding: var(--skin-space-1) var(--skin-space-2);
+            background-color: var(--skin-surface-raised);
+            border: 1px solid var(--skin-border);
+            border-radius: var(--skin-radius-pill);
+            box-shadow: var(--skin-shadow-1);
+        }
+
+        .chat-msg__actions .btn--standalone {
+            opacity: 1;
+            margin-top: 0;
+        }
+    }
+
+    .message.chat-msg:hover converse-message-actions,
+    .message.chat-msg:focus-within converse-message-actions,
+    .message.chat-msg converse-message-actions:has(.reaction-picker),
+    .message.chat-msg converse-message-actions:has(.dropdown-menu.show) {
+        opacity: 1;
+    }
+
+    // Own messages in 1:1 chats sit on the right, with the avatar after the bubble.
+    #{$skin-own-1to1} {
+        flex-direction: row-reverse;
+
+        .chat-msg__content {
+            margin-inline-start: 0;
+            margin-inline-end: 0.5rem;
+        }
+
+        .chat-msg__heading {
+            justify-content: flex-end;
+        }
+
+        .chat-msg__body {
+            align-self: flex-end;
+        }
+
+        .chat-msg__reactions {
+            justify-content: flex-end;
+        }
+
+        converse-message-unfurl .card.card--unfurl {
+            margin-inline-start: auto;
+        }
+    }
+
+    #{$skin-own-1to1}.chat-msg--followup {
+        &.chat-msg--with-avatar .chat-msg__content {
+            margin-inline-start: 0;
+            margin-inline-end: calc(var(--skin-avatar-message, 44px) + 0.5rem);
+        }
+
+        .chat-msg__body {
+            border-start-start-radius: var(--skin-bubble-radius);
+            border-end-start-radius: var(--skin-bubble-radius);
+            border-start-end-radius: var(--skin-radius-sm);
+            border-end-end-radius: var(--skin-radius-sm);
+        }
+    }
+
+    // Day and "new messages" separators become centred pill labels.
+    .message.date-separator,
+    .message.separator {
+        display: flex;
+        justify-content: center;
+        height: auto;
+        margin: var(--skin-space-3) 0 var(--skin-space-2);
+
+        hr.separator {
+            display: none;
+        }
+
+        .separator-text {
+            bottom: 0;
+            padding: var(--skin-space-1) var(--skin-space-3);
+            line-height: 1.4;
+            color: var(--skin-muted-text);
+            font-size: var(--skin-font-size-sm);
+            font-weight: 500;
+            background: var(--skin-surface-raised);
+            border: 1px solid var(--skin-border);
+            border-radius: var(--skin-radius-pill);
+        }
+    }
+
+    .message.separator .separator-text {
+        color: var(--skin-accent);
+        background: var(--skin-accent-soft);
+        border-color: transparent;
+    }
+}
