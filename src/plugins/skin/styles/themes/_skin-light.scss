@@ -95,7 +95,9 @@
     // Online status indicators
     --chat-status-away: #d97706;
     --chat-status-busy: var(--red);
-    --chat-status-offline: #a0a6b1;
+    // Darkened from #a0a6b1 (2.45:1) to clear 3:1 against every row background this dot
+    // appears on, including the hover and selected tints.
+    --chat-status-offline: #808080;
     --chat-status-online: #1e9e55;
 
     --controlbox-color: var(--blue);

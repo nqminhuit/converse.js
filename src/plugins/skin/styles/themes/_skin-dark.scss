@@ -15,8 +15,10 @@
     --dark-blue: #9ec5fe;
     --dark-green: #33d375;
     --dark-green-rgb: 51, 211, 117;
-    --red: #ff5252;
-    --red-rgb: 255, 82, 82;
+    // Lightened from #ff5252: dark text (#2a2a3d) on this fill, and this as text on the
+    // panel or a raised modal, both need 4.5:1; #ff5252 only reached 4.40:1.
+    --red: #ff6b6b;
+    --red-rgb: 255, 107, 107;
     --gray: #9797a0;
     --green: #00c853;
     --green-rgb: 0, 200, 83;
@@ -96,7 +98,9 @@
     // Online status indicators
     --chat-status-away: var(--orange);
     --chat-status-busy: var(--red);
-    --chat-status-offline: #6c6c80;
+    // Lightened from #6c6c80 (2.74:1, 2.26:1 on a highlighted row) to clear 3:1 against
+    // every row background this dot appears on, including the hover and selected tints.
+    --chat-status-offline: #9a9ab8;
     --chat-status-online: var(--green);
 
     --controlbox-color: var(--blue);
@@ -135,7 +139,8 @@
     // --------------
     --brand-heading-color: var(--blue);
     --chat-color-hover: var(--dark-blue);
-    --danger-color-hover: #ff7575;
+    // Kept a step lighter than the new --red so hover still reads as a state change.
+    --danger-color-hover: #ff8080;
     --global-background-color: #1e1e2f;
     --link-color-hover: var(--dark-blue);
     --muc-color-hover: var(--dark-blue);

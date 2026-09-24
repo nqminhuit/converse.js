@@ -356,7 +356,10 @@ $skin-file-progress: '.message.chat-msg:has(> .chat-msg__content > progress)';
     }
 
     .message.separator .separator-text {
-        color: var(--skin-accent);
+        // var(--link-color) alone clears 4.5:1 in light but rounds to just under it in dark
+        // (the theme's link colour equals its accent); nudging 10% toward the foreground
+        // colour darkens it in light and lightens it in dark, clearing both with margin.
+        color: color-mix(in srgb, var(--link-color) 90%, var(--foreground-color));
         background: var(--skin-accent-soft);
         border-color: transparent;
     }
