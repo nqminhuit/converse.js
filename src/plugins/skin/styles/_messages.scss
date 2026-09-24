@@ -99,7 +99,8 @@ $skin-own-1to1: 'converse-chat .message.chat-msg:has(> .chat-msg__content--me):n
                 text-decoration: underline;
             }
 
-            // Secondary text on the accent fill; 90% keeps 4.5:1 in both themes, 85% fails in dark.
+            // Secondary text on the accent fill: 90% white on --skin-bubble-me (#0b5ed7) is 5.04:1,
+            // clearing WCAG AA's 4.5:1 in both themes.
             blockquote,
             .styling-directive,
             .chat-msg__time {

@@ -147,7 +147,8 @@
     --skin-surface-sunken: #f0f2f5;
     --skin-border: #e3e6ec;
     --skin-bubble-them: #eef0f4;
-    --skin-bubble-me: var(--blue);
+    // Darker than --blue: 90% white on #0d6efd is 3.92:1 (fails AA); #0b5ed7 keeps it at 5.04:1.
+    --skin-bubble-me: #0b5ed7;
     --skin-bubble-me-text: #ffffff;
     --skin-accent-contrast: #ffffff;
     --skin-muted-text: var(--subdued-color);
