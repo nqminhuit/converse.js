@@ -1,0 +1,67 @@
+// Skin token contract. T0 owns the names; theme files may override the colour values.
+
+// Container-width breakpoints, used by _responsive.scss.
+$skin-narrow: 640px;
+$skin-medium: 1024px;
+
+// Avatar sizes (<length>) live on :root because T1 writes them inline on <html>; declaring them on
+// converse-root would shadow that. Consumers still read them with var(..., fallback).
+:root {
+    --skin-avatar-message: 44px;
+    --skin-avatar-heading: 44px;
+    --skin-avatar-list: 36px;
+    --skin-avatar-occupant: 32px;
+    --skin-avatar-profile: 48px;
+}
+
+.conversejs,
+converse-bg {
+    &[data-converse-theme^='skin-'] {
+        // Colours (all <color>), derived from the active theme's variables
+        --skin-surface: var(--background-color);
+        --skin-surface-raised: color-mix(in srgb, var(--background-color) 94%, var(--foreground-color));
+        --skin-surface-sunken: color-mix(in srgb, var(--background-color) 90%, var(--foreground-color));
+        --skin-border: color-mix(in srgb, var(--foreground-color) 15%, transparent);
+        --skin-hover: color-mix(in srgb, var(--foreground-color) 6%, transparent);
+        --skin-active: color-mix(in srgb, var(--primary-color) 16%, transparent);
+        --skin-accent: var(--primary-color);
+        --skin-accent-contrast: #fff;
+        --skin-accent-soft: color-mix(in srgb, var(--primary-color) 14%, transparent);
+        --skin-bubble-them: var(--skin-surface-raised);
+        --skin-bubble-me: var(--skin-accent);
+        --skin-bubble-me-text: var(--skin-accent-contrast);
+        --skin-muted-text: color-mix(in srgb, var(--foreground-color) 65%, var(--background-color));
+        // A colour, used as `box-shadow: 0 0 0 3px var(--skin-focus-ring)`.
+        --skin-focus-ring: color-mix(in srgb, var(--primary-color) 40%, transparent);
+
+        // Shape (<length>)
+        --skin-radius-sm: 6px;
+        --skin-radius-md: 12px;
+        --skin-radius-lg: 18px;
+        --skin-radius-pill: 999px;
+        --skin-bubble-radius: var(--skin-radius-lg);
+
+        // Elevation (full box-shadow values)
+        --skin-shadow-1: 0 1px 2px rgb(0 0 0 / 6%), 0 1px 3px rgb(0 0 0 / 8%);
+        --skin-shadow-2: 0 4px 12px rgb(0 0 0 / 10%), 0 12px 32px rgb(0 0 0 / 12%);
+
+        // Spacing (<length>)
+        --skin-space-1: 4px;
+        --skin-space-2: 8px;
+        --skin-space-3: 12px;
+        --skin-space-4: 16px;
+        --skin-space-5: 24px;
+
+        // Type (font stacks and <length> sizes)
+        --skin-font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        --skin-font-size: 15px;
+        --skin-font-size-sm: 13px;
+        --normal-font: var(--skin-font);
+        --heading-font: var(--skin-font);
+
+        // Motion (<time> and easing function)
+        --skin-dur-fast: 120ms;
+        --skin-dur: 200ms;
+        --skin-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+}

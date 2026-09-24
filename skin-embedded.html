@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Converse (skin, embedded)</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="shortcut icon" type="image/ico" href="images/favicon.ico" />
+        <link type="text/css" rel="stylesheet" media="screen" href="dist/converse.css" />
+        <script type="module" src="dist/converse.js"></script>
+        <style>
+            /* Mock dashboard: stands in for the host page that embeds Converse. */
+            body {
+                margin: 0;
+                font-family: system-ui, sans-serif;
+                background: #eef0f4;
+                color: #1f2430;
+            }
+            .dashboard {
+                display: grid;
+                grid-template-columns: minmax(200px, 1fr) auto;
+                grid-template-rows: auto auto 1fr;
+                grid-template-areas:
+                    'header header'
+                    'card-a chat'
+                    'card-b chat';
+                gap: 16px;
+                padding: 16px;
+                min-height: 100vh;
+                box-sizing: border-box;
+            }
+            .dashboard__header {
+                grid-area: header;
+                padding: 12px 16px;
+                background: #fff;
+                border-radius: 12px;
+                font-weight: 600;
+            }
+            .dashboard__card {
+                padding: 16px;
+                background: #fff;
+                border-radius: 12px;
+                min-height: 160px;
+            }
+            .dashboard__card--a {
+                grid-area: card-a;
+            }
+            .dashboard__card--b {
+                grid-area: card-b;
+            }
+            .dashboard__chat {
+                grid-area: chat;
+                width: 760px;
+                height: 640px;
+                min-width: 280px;
+                min-height: 360px;
+                max-width: calc(100vw - 32px);
+                resize: both;
+                overflow: auto;
+            }
+            .dashboard__chat converse-root {
+                height: 100%;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="dashboard">
+            <header class="dashboard__header">Dashboard</header>
+            <section class="dashboard__card dashboard__card--a">Placeholder card A</section>
+            <section class="dashboard__card dashboard__card--b">Placeholder card B</section>
+            <!-- Drag the bottom-right corner to resize the chat panel. -->
+            <section class="dashboard__chat">
+                <converse-root></converse-root>
+            </section>
+        </div>
+
+        <script type="module">
+            converse.initialize({
+                auto_away: 300,
+                avatar_sizes: { message: 48, heading: 44, list: 40, occupant: 32, profile: 56 },
+                dark_theme: 'skin-dark',
+                loglevel: 'debug',
+                message_archiving: 'always',
+                show_controlbox_by_default: true,
+                theme: 'skin-light',
+                view_mode: 'embedded',
+                // bosh_service_url: 'https://conversejs.org/http-bind/', // Please use this connection manager only for testing purposes
+                // websocket_url: 'wss://conversejs.org/xmpp-websocket',
+            });
+        </script>
+    </body>
+</html>

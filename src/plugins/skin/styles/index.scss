@@ -1,0 +1,18 @@
+// Fork reskin entry. Each partial is owned by one task; see the Skin section in .claude/CLAUDE.md.
+@import 'tokens';
+@import 'mixins';
+
+// Theme files start with `&[data-converse-theme=...]`, like upstream's, so they need this wrapper.
+.conversejs,
+converse-bg {
+    @import 'themes/skin-light';
+    @import 'themes/skin-dark';
+}
+
+@import 'avatars';
+@import 'messages';
+@import 'composer';
+@import 'lists';
+@import 'chrome';
+@import 'motion';
+@import 'responsive';

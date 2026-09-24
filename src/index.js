@@ -53,6 +53,7 @@ import './plugins/dragresize/index.js'; // Allows chat boxes to be resized by dr
 import './plugins/fullscreen/index.js';
 import './plugins/reactions-views/index.js'; // XEP-0444 Reactions
 /* END: Plugins */
+import './plugins/skin/index.js'; // fork: reskin
 
 _converse.exports.CustomElement = CustomElement;
 

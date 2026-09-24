@@ -35,15 +35,14 @@ Theming works through CSS custom properties (see `docs/src/content/docs/theming.
   (`src/plugins/<plugin>/templates/`, `src/templates/`).
 
 Order of preference for any visual change:
-1. Set CSS variables in the fork's own theme file(s), added next to the shipped themes plus one import
-   line in `src/shared/styles/index.scss`.
-2. Put override rules in a fork-owned SCSS file, imported once, rather than editing plugin SCSS.
+1. Set CSS variables in the skin's theme files (`src/plugins/skin/styles/themes/`).
+2. Put override rules in the skin partial that owns that area (see "Skin" below).
 3. Edit upstream SCSS or templates only as a last resort, and flag each such edit to the user, since
-   it is a likely conflict point.
+   it breaks the one-line upstream footprint and is a likely conflict point.
 
 The demo pages set the theme themselves: `dev.html` uses `theme: 'nordic'` and
-`dark_theme: 'cyberpunk'`. To preview a fork theme, change the setting locally in `dev.html`, or in a
-separate untracked copy of it.
+`dark_theme: 'cyberpunk'`. To preview the skin, use `skin.html` (fullscreen) or `skin-embedded.html`
+(inside a resizable dashboard panel) instead of editing `dev.html`.
 
 ## Checking a visual change
 
@@ -53,8 +52,85 @@ style change shows up in tests or in the static server.
 
 ## Syncing with upstream
 
-This clone has only `origin` (the fork). Add upstream once with
-`git remote add upstream https://github.com/conversejs/converse.js.git`. To sync, run
+`origin` is the fork and `upstream` is conversejs/converse.js (add it with
+`git remote add upstream https://github.com/conversejs/converse.js.git` if missing). To sync, run
 `git fetch upstream && git rebase upstream/master`, then `git push --force-with-lease origin master`.
 After a rebase, rebuild and look over the fork's theme, because upstream may have added CSS variables
-that a copied theme doesn't define yet. Diff the fork theme's variables against the current `classic.scss`.
+that a copied theme doesn't define yet. Diff the skin themes' variable names against the current `classic.scss`:
+
+```bash
+diff <(grep -o -- '--[a-z0-9-]*:' src/shared/styles/themes/classic.scss | sort -u) \
+     <(grep -o -- '--[a-z0-9-]*:' src/plugins/skin/styles/themes/_skin-light.scss | sort -u)
+```
+
+Repeat for `_skin-dark.scss`. Any line starting with `<` is a variable the skin theme must add.
+
+## Skin
+
+The reskin lives in `src/plugins/skin/` as the `converse-skin` plugin. Its only upstream footprint is
+one line in `src/index.js`, right after `/* END: Plugins */`:
+
+```js
+import './plugins/skin/index.js'; // fork: reskin
+```
+
+Do not change any other upstream file (SCSS, templates, JS, `dev.html`, `package.json`,
+`vitest.config.js`, `src/shared/constants.js`). The plugin whitelists itself with
+`VIEW_PLUGINS.push('converse-skin')`. Fork files outside the plugin are `skin.html`,
+`skin-embedded.html` and `.claude/`.
+
+### Rules
+
+- Skin-look rules go under `[data-converse-theme^='skin-']` via `@include skin { ... }` from
+  `styles/_mixins.scss`. Theme-independent avatar-size rules use `converse-root.conversejs`. Win on
+  specificity, not bundle order; use `!important` only against inline styles.
+- Use the tokens in `styles/_tokens.scss` (surfaces, colour, radius, shadow, spacing, type, motion,
+  avatars, and the `$skin-narrow` / `$skin-medium` breakpoints). If a token is missing, report it
+  rather than editing a file another task owns.
+- Only `_motion.scss` adds `transition`, `animation` or `@keyframes`. Only `_responsive.scss` adds
+  `@media` or `@container` rules.
+- Verify selectors against the real templates (`src/plugins/*/templates`, `src/shared/chat/templates`).
+
+### File ownership
+
+| Task | Files (under `src/plugins/skin/` unless noted) |
+| --- | --- |
+| T0 scaffold | `index.js`, `styles/index.scss`, `styles/_tokens.scss`, `styles/_mixins.scss`, `tests/scaffold.js`, the `src/index.js` line, `skin.html`, `skin-embedded.html`, `.claude/CLAUDE.md` |
+| T1 avatar sizes | `avatar-sizes.js`, `styles/_avatars.scss`, `tests/avatar-sizes.js` |
+| T2 themes | `styles/themes/_skin-light.scss`, `styles/themes/_skin-dark.scss` |
+| T3 messages | `styles/_messages.scss` |
+| T4 composer | `styles/_composer.scss` |
+| T5 lists | `styles/_lists.scss` |
+| T6 motion | `styles/_motion.scss` |
+| T7 responsive and embedded | `styles/_responsive.scss` |
+| T8 app chrome | `styles/_chrome.scss` |
+| T9 integration | any skin file, for cross-task fixes only |
+
+### `avatar_sizes` setting
+
+An object of pixel sizes, merged over the defaults
+`{ message: 44, heading: 44, list: 36, occupant: 32, profile: 48 }`. Each key is written to
+`--skin-avatar-<key>` on `document.documentElement` and applies under any theme.
+
+### Embedding on a dashboard
+
+Build with `npm run build`, then load `dist/converse.min.js` and `dist/converse.min.css`. Put
+`<converse-root></converse-root>` inside a container with a set size, then initialize:
+
+```js
+converse.initialize({
+    view_mode: 'embedded',
+    theme: 'skin-light',
+    dark_theme: 'skin-dark',
+    avatar_sizes: { message: 48, list: 40 },
+    /* connection settings */
+});
+```
+
+### Checks
+
+Run `npm run dev`, then `npx vitest run --project main src/plugins/skin/tests/`, `npm run lint` and
+the full `npm test` (the skin loads in every suite). Look at `skin.html` and `skin-embedded.html`
+under `npm run devserver` in light and dark. `git fetch upstream && git diff upstream/master --stat`
+must show only the one-line `src/index.js` change plus `src/plugins/skin/**`, `skin*.html` and
+`.claude/**`.
