@@ -85,6 +85,16 @@ converse-root.conversejs {
         }
     }
 
+    // Upstream offsets the unread badge in ems from where a 30px avatar ends; pin it to this avatar's top-right
+    // corner instead. The chain outranks upstream's `.conversejs converse-muc-occupants ... .msgs-indicator`.
+    converse-muc-occupants .occupants .items-list converse-muc-occupant-list-item .list-item.occupant .col-auto {
+        .msgs-indicator {
+            top: -0.25rem;
+            inset-inline-start: calc(#{$occupant-size} - 0.75rem);
+            margin: 0;
+        }
+    }
+
     converse-user-profile {
         @include avatar-size($profile-size);
     }

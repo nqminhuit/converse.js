@@ -142,6 +142,14 @@ $skin-control-size: 40px;
             }
         }
 
+        // Upstream renders the preview in both the panel and the form it wraps, under the same condition.
+        // Keep the panel's copy; the occupant panel has no copy of its own, so its form keeps one.
+        &:is(converse-chat-bottom-panel, converse-muc-bottom-panel)
+            > :is(converse-message-form, converse-muc-message-form)
+            > converse-reply-preview {
+            display: none;
+        }
+
         // With a reply pending, the preview and the form read as one block: the hairline moves above the preview.
         &:has(> converse-reply-preview .reply-preview) {
             > converse-reply-preview:has(.reply-preview) {
