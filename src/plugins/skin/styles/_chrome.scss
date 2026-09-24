@@ -1,1 +1,397 @@
-// Owned by T8. See the Skin section in .claude/CLAUDE.md.
+// Owned by T8: app chrome (controlbox, profile, heads, sidebar, switcher, modals, dropdowns, toasts,
+// alerts, buttons, scrollbars). See the Skin section in .claude/CLAUDE.md.
+
+// Quiet round icon button with a hover/active plate; no transition (that is _motion.scss's).
+@mixin skin-round-icon-btn($size: 2.25rem) {
+    align-items: center;
+    background-color: transparent;
+    border-radius: 50%;
+    height: $size;
+    justify-content: center;
+    min-width: $size;
+    padding: 0;
+
+    &:hover,
+    &:focus-visible {
+        background-color: var(--skin-hover);
+    }
+
+    &:active {
+        background-color: var(--skin-active);
+    }
+
+    &:focus-visible {
+        box-shadow: 0 0 0 3px var(--skin-focus-ring);
+        outline: none;
+    }
+}
+
+// Scrollbars: `scrollbar-color` inherits, `scrollbar-width` does not.
+@include skin {
+    scrollbar-color: color-mix(in srgb, var(--skin-muted-text) 45%, transparent) transparent;
+
+    &,
+    * {
+        scrollbar-width: thin;
+    }
+}
+
+// Controlbox: a plain surface panel with a hairline edge instead of the coloured rule and shadow.
+converse-controlbox#controlbox .flyout.box-flyout {
+    @include skin {
+        background-color: var(--skin-surface);
+        border-inline-end: 1px solid var(--skin-border);
+        box-shadow: none;
+    }
+}
+
+// Profile header: avatar, bold name, muted status line.
+converse-user-profile {
+    @include skin {
+        border-bottom: 1px solid var(--skin-border);
+        padding: var(--skin-space-3) var(--skin-space-4);
+
+        .userinfo {
+            .profile {
+                align-items: center;
+                margin-bottom: var(--skin-space-1);
+            }
+
+            .show-profile {
+                align-items: center;
+                color: var(--foreground-color);
+                display: flex;
+                gap: var(--skin-space-3);
+                min-width: 0;
+                text-decoration: none;
+            }
+
+            .username {
+                font-size: var(--skin-font-size);
+                font-weight: 600;
+                margin: 0;
+            }
+
+            .xmpp-status__msg {
+                color: var(--skin-muted-text);
+                font-size: var(--skin-font-size-sm);
+            }
+        }
+
+        .xmpp-status {
+            // Line the status up under the name, past the avatar and the gap.
+            padding-inline-start: calc(var(--skin-avatar-profile, 48px) + var(--skin-space-3));
+        }
+
+        .change-status {
+            cursor: pointer;
+            text-align: start;
+            text-decoration: none;
+        }
+
+        .controlbox-heading__btn {
+            @include skin-round-icon-btn;
+            color: var(--skin-muted-text);
+            display: inline-flex;
+
+            converse-icon svg {
+                fill: var(--skin-muted-text);
+            }
+        }
+    }
+}
+
+// Chat, MUC and headlines heads. The header colours are re-pointed on the head itself, which also
+// reaches upstream's `!important` uses of them; the subdued colour must be re-derived here too.
+.chatbox .chat-head {
+    @include skin {
+        --chat-header-bg-color: var(--skin-surface);
+        --chat-header-fg-color: var(--foreground-color);
+        --chat-header-subdued-color: var(--skin-muted-text);
+        --muc-header-bg-color: var(--skin-surface);
+        --muc-header-fg-color: var(--foreground-color);
+        --headlines-header-bg-color: var(--skin-surface);
+        --headlines-header-fg-color: var(--foreground-color);
+        --btn-quiet-tint: var(--foreground-color);
+
+        align-items: center;
+        background-color: var(--skin-surface);
+        color: var(--foreground-color);
+
+        .chatbox-title {
+            align-items: center;
+            gap: var(--skin-space-2);
+            padding: var(--skin-space-3) var(--skin-space-4) 0;
+        }
+
+        .chatbox-title--no-desc {
+            padding: var(--skin-space-3) var(--skin-space-4);
+        }
+
+        .chatbox-title--row {
+            align-items: center;
+            gap: var(--skin-space-3);
+        }
+
+        .avatar {
+            margin-inline-end: 0;
+        }
+
+        .chatbox-title__text {
+            font-size: var(--skin-font-size);
+            font-weight: 600;
+
+            a {
+                color: inherit;
+                text-decoration: none;
+            }
+        }
+
+        .chat-head__desc {
+            color: var(--skin-muted-text);
+            font-size: var(--skin-font-size-sm);
+            padding: var(--skin-space-1) var(--skin-space-4) var(--skin-space-3);
+        }
+
+        .chatbox-title__details .chat-head__desc {
+            color: var(--skin-muted-text);
+            padding: 0;
+        }
+
+        .chatbox-title__buttons {
+            align-items: center;
+            gap: var(--skin-space-1);
+        }
+
+        .chatbox-btn {
+            margin: 0;
+
+            converse-icon svg {
+                fill: var(--skin-muted-text);
+            }
+        }
+
+        button.chatbox-btn,
+        .chatbox-btn .btn--standalone {
+            @include skin-round-icon-btn;
+        }
+
+        converse-controlbox-navback .fa-arrow-left svg {
+            fill: var(--skin-muted-text);
+        }
+    }
+}
+
+// Each head's own bottom rule, mirrored at a higher specificity than upstream's.
+.chatbox .chat-head.chat-head-chatbox,
+converse-muc.chatroom .chat-head.chat-head-chatroom,
+.chatbox.headlines converse-headlines-heading.chat-head.chat-head-chatbox {
+    @include skin {
+        background-color: var(--skin-surface);
+        border-bottom: 1px solid var(--skin-border);
+    }
+}
+
+// Headlines heads carry a longer upstream chain for padding and icon fill.
+.chatbox.headlines converse-headlines-heading.chat-head {
+    @include skin {
+        .chatbox-title--no-desc {
+            padding: var(--skin-space-3) var(--skin-space-4);
+        }
+
+        .chatbox-btn converse-icon svg {
+            fill: var(--skin-muted-text);
+        }
+    }
+}
+
+// Upstream sets the MUC title to normal weight.
+converse-muc.chatroom .chat-head.chat-head-chatroom .chatbox-title .chatbox-title__text {
+    @include skin {
+        font-weight: 600;
+    }
+}
+
+// MUC occupant sidebar: a surface panel split from the chat by a hairline.
+converse-muc.chatroom {
+    @include skin {
+        converse-muc-sidebar {
+            background-color: var(--skin-surface);
+
+            .sidebar-heading {
+                color: var(--foreground-color);
+                font-size: var(--skin-font-size);
+                font-weight: 600;
+            }
+        }
+
+        converse-muc-occupants .occupants .occupants-header--title {
+            align-items: center;
+            padding: var(--skin-space-3) var(--skin-space-4);
+
+            .sidebar-heading {
+                white-space: nowrap;
+            }
+
+            .hide-occupants {
+                @include skin-round-icon-btn(2rem);
+                align-self: center;
+                display: inline-flex;
+            }
+
+            converse-icon svg {
+                fill: var(--skin-muted-text);
+            }
+        }
+
+        converse-split-resize {
+            background-color: var(--skin-border);
+        }
+    }
+}
+
+// App switcher: a flat rail with a hairline edge; the active app gets the soft accent tile.
+converse-app-switcher {
+    @include skin {
+        --highlight-color: var(--skin-accent-soft);
+
+        background-color: var(--skin-surface);
+        border-inline-end: 1px solid var(--skin-border);
+        box-shadow: none;
+        padding: var(--skin-space-2);
+
+        li {
+            margin-bottom: var(--skin-space-2);
+        }
+
+        .nav-link {
+            align-items: center;
+            background-color: transparent;
+            border-radius: var(--skin-radius-md);
+            display: flex;
+            justify-content: center;
+            padding: var(--skin-space-3);
+
+            &:hover,
+            &:focus-visible {
+                background-color: var(--skin-hover);
+            }
+
+            &:focus-visible {
+                box-shadow: 0 0 0 3px var(--skin-focus-ring);
+            }
+
+            converse-icon svg {
+                fill: var(--skin-muted-text);
+            }
+
+            &.active {
+                converse-icon svg {
+                    fill: var(--skin-accent);
+                }
+
+                &::before {
+                    background-color: var(--skin-accent);
+                    inset-inline-start: calc(-1 * var(--skin-space-2));
+                }
+            }
+        }
+    }
+}
+
+// Modals: large radius and soft elevation. Bootstrap reads the radii on `.modal` itself.
+#converse-modals .modal {
+    @include skin {
+        --converse-modal-border-radius: var(--skin-radius-lg);
+        --converse-modal-inner-border-radius: calc(var(--skin-radius-lg) - 1px);
+        --converse-modal-border-color: var(--skin-border);
+
+        .modal-content {
+            background-color: var(--skin-surface-raised);
+            box-shadow: var(--skin-shadow-2);
+        }
+
+        .modal-header {
+            padding: var(--skin-space-3) var(--skin-space-4);
+        }
+
+        .modal-title {
+            font-weight: 600;
+        }
+
+        .modal-footer {
+            border-top-color: var(--skin-border);
+        }
+    }
+}
+
+// Dropdowns: a raised, rounded menu. The highlight variables are re-pointed because upstream
+// paints item hover with `!important`.
+converse-dropdown .dropdown-menu {
+    @include skin {
+        --highlight-color: var(--skin-active);
+        --highlight-color-hover: var(--skin-hover);
+
+        background: var(--skin-surface-raised);
+        border: 1px solid var(--skin-border);
+        border-radius: var(--skin-radius-md);
+        box-shadow: var(--skin-shadow-2);
+        padding: var(--skin-space-1);
+
+        .dropdown-item {
+            border-radius: var(--skin-radius-sm);
+            padding: var(--skin-space-2) var(--skin-space-3);
+        }
+
+        .dropdown-divider {
+            border-top-color: var(--skin-border);
+        }
+    }
+}
+
+// Toasts keep the theme's colours (declared `!important` there); only shape and elevation change.
+converse-toasts converse-toast .toast {
+    @include skin {
+        --converse-toast-border-radius: var(--skin-radius-md);
+        --converse-toast-box-shadow: var(--skin-shadow-2);
+    }
+}
+
+.alert {
+    @include skin {
+        --converse-alert-border-radius: var(--skin-radius-md);
+    }
+}
+
+// Bootstrap buttons: rounded, with the primary variants in the accent colour.
+.btn {
+    @include skin {
+        --converse-btn-border-radius: var(--skin-radius-md);
+        --converse-btn-focus-box-shadow: 0 0 0 3px var(--skin-focus-ring);
+    }
+}
+
+.btn-primary {
+    @include skin {
+        --converse-btn-color: var(--skin-accent-contrast);
+        --converse-btn-bg: var(--skin-accent);
+        --converse-btn-border-color: var(--skin-accent);
+        --converse-btn-hover-color: var(--skin-accent-contrast);
+        --converse-btn-hover-bg: color-mix(in srgb, var(--skin-accent) 85%, var(--foreground-color));
+        --converse-btn-hover-border-color: var(--converse-btn-hover-bg);
+        --converse-btn-active-bg: color-mix(in srgb, var(--skin-accent) 72%, var(--foreground-color));
+        --converse-btn-active-border-color: var(--converse-btn-active-bg);
+    }
+}
+
+.btn-outline-primary {
+    @include skin {
+        --converse-btn-color: var(--skin-accent);
+        --converse-btn-border-color: var(--skin-accent);
+        --converse-btn-hover-color: var(--skin-accent-contrast);
+        --converse-btn-hover-bg: var(--skin-accent);
+        --converse-btn-hover-border-color: var(--skin-accent);
+        --converse-btn-active-bg: var(--skin-accent);
+        --converse-btn-active-border-color: var(--skin-accent);
+    }
+}
