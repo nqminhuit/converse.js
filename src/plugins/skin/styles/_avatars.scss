@@ -1,1 +1,91 @@
-// Owned by T1. See the Skin section in .claude/CLAUDE.md.
+// Owned by T1. Theme-independent: sizes avatars per context from the `--skin-avatar-*` variables.
+
+// Sizes both avatar renderings. The initials div carries an inline size and font, hence `!important`.
+@mixin avatar-size($size) {
+    converse-avatar .avatar,
+    converse-avatar .avatar image {
+        width: $size;
+        height: $size;
+    }
+
+    converse-avatar .avatar-initials {
+        width: $size !important;
+        height: $size !important;
+        line-height: $size !important;
+        font-size: calc(#{$size} / 2.2) !important;
+    }
+}
+
+// Pins a `$dot`-wide status dot to the bottom-right of the avatar, which must sit at the wrapper's top-left.
+@mixin avatar-status-dot($size, $dot) {
+    position: relative;
+    align-items: flex-start;
+
+    converse-avatar {
+        display: flex;
+    }
+
+    .chat-status.chat-status--avatar {
+        position: absolute;
+        top: calc(#{$size} - #{$dot});
+        inset-inline-start: calc(#{$size} - #{$dot});
+        margin: 0;
+    }
+}
+
+$message-size: var(--skin-avatar-message, 44px);
+$heading-size: var(--skin-avatar-heading, 44px);
+$list-size: var(--skin-avatar-list, 36px);
+$occupant-size: var(--skin-avatar-occupant, 32px);
+$profile-size: var(--skin-avatar-profile, 48px);
+
+converse-root.conversejs {
+    --message-avatar-width: #{$message-size};
+    --message-avatar-height: #{$message-size};
+
+    // Covers both the message row and the file-progress row, which share this element.
+    converse-chat-message {
+        @include avatar-size($message-size);
+    }
+
+    // Beats upstream's `.conversejs .message.chat-msg.chat-msg--followup.chat-msg--with-avatar` 3rem indent.
+    .message.chat-msg.chat-msg--followup.chat-msg--with-avatar .chat-msg__content {
+        margin-inline-start: calc(#{$message-size} + 0.5rem);
+    }
+
+    converse-chat-heading,
+    converse-muc-heading {
+        @include avatar-size($heading-size);
+    }
+
+    converse-roster,
+    converse-rooms-list {
+        @include avatar-size($list-size);
+    }
+
+    // Upstream fixes these rows at 2.5em, which a larger avatar would overflow. IDs match upstream's to outrank it.
+    #controlbox converse-roster .roster-contacts .roster-group-contacts .list-item,
+    #chatrooms converse-rooms-list .list-item .open-room {
+        height: auto;
+        min-height: 2.5em;
+    }
+
+    // `#controlbox` outranks upstream's `.conversejs #controlbox ... converse-icon.chat-status { position: relative }`.
+    #controlbox converse-roster .list-item-link > span:first-child {
+        display: inline-flex;
+        @include avatar-status-dot($list-size, 12px);
+    }
+
+    converse-muc-occupant-list-item {
+        @include avatar-size($occupant-size);
+
+        .occupant .col-auto {
+            display: flex;
+            @include avatar-status-dot($occupant-size, 12px);
+        }
+    }
+
+    converse-user-profile {
+        @include avatar-size($profile-size);
+    }
+}
