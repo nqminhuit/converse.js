@@ -158,6 +158,9 @@ viewer for the rest of the session. The choice is stored in `localStorage` under
 `localStorage` is keyed by origin, not by frame. Set to `false` to disable, in which case no button
 shows and no stored choice is applied. A page that pins `theme` and `dark_theme` to the same value
 (e.g. the dashboard embed) gets no toggle either, and ignores whatever the standalone page stored.
+Picking the theme the OS would already give back (given the page's configured `theme`/`dark_theme`)
+clears the stored override instead of pinning it, so the viewer goes back to following
+`prefers-color-scheme`; picking the opposite of the OS pick still pins it, as before.
 
 ### Blocklist menu
 

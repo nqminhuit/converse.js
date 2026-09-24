@@ -14,6 +14,7 @@ const SETTING = 'skin_theme_toggle';
 const STORAGE_KEY = 'converse-skin-theme';
 const LIGHT = 'skin-light';
 const DARK = 'skin-dark';
+const PREFERS_DARK_QUERY = '(prefers-color-scheme: dark)';
 
 // Sized to fill the 24x24 box edge-to-edge (rays from r=8.5 to r=11), matching the FA icons'
 // visual weight at `size="1em"` instead of reading as a speck next to the gear.
@@ -33,6 +34,14 @@ let patched = false;
 // Whether the page pinned `theme`/`dark_theme` to the same value, captured at init time before
 // a stored choice or click can make them equal on their own. Re-set on each init (tests re-init).
 let pinned = false;
+
+// The configured `theme`/`dark_theme` pair, captured at init before any stored choice is applied.
+// Re-set on each init so a click can later restore exactly what the page was configured with.
+let configured_light = null;
+let configured_dark = null;
+
+// Guards against attaching the OS-change listener more than once across re-inits (tests re-init).
+let media_listener_registered = false;
 
 /**
  * @param {string} [theme]
@@ -72,6 +81,22 @@ function writeStoredTheme(value) {
     }
 }
 
+function clearStoredTheme() {
+    try {
+        localStorage.removeItem(STORAGE_KEY);
+    } catch {
+        // Storage can throw in private windows or third-party iframes; the reset still applies for the session.
+    }
+}
+
+/**
+ * What the configured `theme`/`dark_theme` pair would already give for the current OS
+ * preference, i.e. what the page would show if nothing had ever been stored.
+ */
+function osImpliedTheme() {
+    return window.matchMedia(PREFERS_DARK_QUERY).matches ? configured_dark : configured_light;
+}
+
 /**
  * `converse-root`/`converse-bg` only re-read the theme on their own view_mode/OS-scheme
  * listeners, so force it onto any that already exist.
@@ -98,13 +123,38 @@ function refreshButtons() {
 }
 
 /**
+ * Attaches a listener, once, that keeps the sun/moon icon right after an OS scheme change:
+ * once `onToggleClick` has restored the configured pair, rootview's own matchMedia listeners
+ * re-apply the theme, but nothing else re-renders the button that shows it.
+ */
+function registerMediaListener() {
+    if (media_listener_registered) return;
+    media_listener_registered = true;
+    const mql = window.matchMedia(PREFERS_DARK_QUERY);
+    if (typeof mql.addEventListener === 'function') {
+        mql.addEventListener('change', refreshButtons);
+    } else if (typeof mql.addListener === 'function') {
+        mql.addListener(refreshButtons);
+    }
+}
+
+/**
+ * Picking the theme the OS would already give restores the configured pair and forgets the
+ * override, so the viewer goes back to following `prefers-color-scheme`; picking the opposite
+ * still pins the choice, as before.
  * @param {Event} [ev]
  */
 function onToggleClick(ev) {
     ev?.preventDefault?.();
     const next = getTheme() === DARK ? LIGHT : DARK;
-    writeStoredTheme(next);
-    applyTheme(next);
+    if (next === osImpliedTheme()) {
+        clearStoredTheme();
+        api.settings.set({ theme: configured_light, dark_theme: configured_dark });
+        applyToExistingElements();
+    } else {
+        writeStoredTheme(next);
+        applyTheme(next);
+    }
     refreshButtons();
 }
 
@@ -150,13 +200,22 @@ function patchControlboxButtons() {
 export function initThemeToggle() {
     api.settings.extend({ [SETTING]: true });
 
-    pinned = api.settings.get('theme') === api.settings.get('dark_theme');
+    configured_light = api.settings.get('theme');
+    configured_dark = api.settings.get('dark_theme');
+    pinned = configured_light === configured_dark;
 
     if (api.settings.get(SETTING) && !pinned) {
         const stored = readStoredTheme();
-        if (stored && isSkinTheme(getTheme())) applyTheme(stored);
+        if (stored === osImpliedTheme()) {
+            // Stale storage from before an OS change (or from before this behaviour existed);
+            // clearing it here is a no-op for the theme itself, just cleanup.
+            clearStoredTheme();
+        } else if (stored && isSkinTheme(getTheme())) {
+            applyTheme(stored);
+        }
     }
 
+    registerMediaListener();
     customElements.whenDefined('converse-controlbox-buttons').then(patchControlboxButtons);
 
     // `converse-root`/`converse-bg` may already have rendered with the old theme before this
