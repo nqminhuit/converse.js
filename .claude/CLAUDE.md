@@ -104,13 +104,24 @@ Do not change any other upstream file (SCSS, templates, JS, `dev.html`, `package
 | T6 motion | `styles/_motion.scss` |
 | T7 responsive and embedded | `styles/_responsive.scss` |
 | T8 app chrome | `styles/_chrome.scss` |
-| T9 integration | any skin file, for cross-task fixes only; `occupants-autohide.js`, `tests/occupants-autohide.js` |
+| T9 integration | any skin file, for cross-task fixes only; `occupants-autohide.js`, `tests/occupants-autohide.js`, `sidebar-toggle.js`, `tests/sidebar-toggle.js` |
 
 ### `avatar_sizes` setting
 
 An object of pixel sizes, merged over the defaults
 `{ message: 44, heading: 44, list: 36, occupant: 32, profile: 48 }`. Each key is written to
 `--skin-avatar-<key>` on `document.documentElement` and applies under any theme.
+
+### `skin_sidebar_toggle` setting
+
+Defaults to `true`. `sidebar-toggle.js` (added by T9) adds a heading button, in `embedded` and
+`fullscreen` view modes under a `skin-*` theme, that hides or shows the controlbox sidebar. It uses
+its own persisted flag (`skin_sidebar_hidden` on the controlbox model), not upstream's `closed`
+attribute, which those view modes already use for other things. The flag is reflected as
+`data-skin-sidebar-hidden` on `converse-root`, which `_responsive.scss` reads to hide `#controlbox`
+and let the open chat fill the pane; the button itself is hidden at `$skin-narrow` widths, where T7's
+own list/chat toggle takes over. A safety net reopens the sidebar if the last visible chat closes
+while it's hidden, so the user is never left with an empty panel. Set to `false` to disable.
 
 ### Occupant list auto-hide
 

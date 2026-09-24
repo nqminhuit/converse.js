@@ -78,6 +78,22 @@ $skin-paned-app: 'converse-app-chat.converse-embedded, converse-app-chat.convers
         }
     }
 
+    // Hidden sidebar (skin-sidebar-toggle.js): the open chat takes the full pane. Left out at
+    // narrow widths, where the list/chat toggle below already handles this on its own.
+    @container converse (width > #{$skin-narrow}) {
+        &[data-skin-sidebar-hidden] {
+            #{$skin-paned-app} {
+                > #controlbox {
+                    display: none;
+                }
+
+                > .chatbox:not(#controlbox) {
+                    flex: 1 1 100%;
+                }
+            }
+        }
+    }
+
     // Medium: a narrower list beside the chat.
     @container converse (width <= #{$skin-medium}) {
         #{$skin-paned-app} {
@@ -119,6 +135,11 @@ $skin-paned-app: 'converse-app-chat.converse-embedded, converse-app-chat.convers
                 svg {
                     fill: var(--chat-header-fg-color);
                 }
+            }
+
+            // Upstream's back arrow above is the only list/chat control at this width.
+            .chatbox-btn.toggle-skin-sidebar {
+                display: none;
             }
         }
 
