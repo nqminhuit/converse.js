@@ -45,6 +45,39 @@ converse-controlbox#controlbox .flyout.box-flyout {
     }
 }
 
+// Login brand header (embedded only): upstream's wordmark inherits an un-wrapped, doubly-compounded
+// font-size that outgrows a narrow panel and gets clipped by _responsive.scss's `overflow: clip`.
+converse-app-chat.converse-embedded #controlbox converse-brand-logo {
+    @include skin {
+        max-width: 100%;
+        min-width: 0;
+
+        .brand-heading {
+            flex-wrap: wrap;
+            max-width: 100%;
+            min-width: 0;
+        }
+
+        .brand-name-wrapper {
+            flex-wrap: wrap;
+            font-size: 1.75rem;
+            max-width: 100%;
+            min-width: 0;
+            white-space: normal;
+        }
+
+        .brand-name {
+            min-width: 0;
+        }
+
+        .converse-svg-logo {
+            flex-shrink: 0;
+            height: 2rem;
+            width: auto;
+        }
+    }
+}
+
 // Profile header: avatar, bold name, muted status line.
 converse-user-profile {
     @include skin {

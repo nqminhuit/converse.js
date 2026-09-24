@@ -210,5 +210,17 @@ $skin-paned-app: 'converse-app-chat.converse-embedded, converse-app-chat.convers
         .bottom-panel {
             padding-bottom: env(safe-area-inset-bottom, 0);
         }
+
+        // Shrinks the login brand header further so it stays on one line (base fix: _chrome.scss).
+        // The extra `.brand-heading` outranks that rule's selector on specificity, not source order.
+        converse-app-chat.converse-embedded #controlbox converse-brand-logo {
+            .brand-heading .brand-name-wrapper {
+                font-size: 1.25rem;
+            }
+
+            .brand-heading .converse-svg-logo {
+                height: 1.5rem;
+            }
+        }
     }
 }
