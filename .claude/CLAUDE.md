@@ -111,7 +111,7 @@ but left the menu open. `Dropdown.registerEvents()`/`unregisterEvents()` add/rem
 | T6 motion | `styles/_motion.scss` |
 | T7 responsive and embedded | `styles/_responsive.scss` |
 | T8 app chrome | `styles/_chrome.scss` |
-| T9 integration | any skin file, for cross-task fixes only; `occupants-autohide.js`, `tests/occupants-autohide.js`, `sidebar-toggle.js`, `tests/sidebar-toggle.js` |
+| T9 integration | any skin file, for cross-task fixes only; `occupants-autohide.js`, `tests/occupants-autohide.js`, `sidebar-toggle.js`, `tests/sidebar-toggle.js`, `blocklist-menu.js`, `tests/blocklist-menu.js` |
 
 ### `avatar_sizes` setting
 
@@ -136,6 +136,15 @@ while it's hidden, so the user is never left with an empty panel. Set to `false`
 the viewport, is `$skin-medium` (1024px) wide or less. It only acts under a `skin-*` theme in
 `embedded` or `fullscreen` mode. It runs when a room view opens and when a `ResizeObserver` sees the
 app shrink from wide to narrow. It never opens the list, so the user's toggle still works.
+
+### Blocklist menu
+
+`blocklist-menu.js` (added by T9) hides the contacts ☰ menu's "Show block list" item when the
+server doesn't advertise XEP-0191 blocking (`urn:xmpp:blocking`), mirroring the block/unblock
+buttons upstream already hides. It re-checks `api.disco.supports` after connect/reconnect and
+reflects the result as `data-skin-no-blocking` on `converse-root` (cleared when supported), the
+same pattern as `skin_sidebar_hidden`. `_lists.scss` reads that attribute under any theme, since
+this is correctness rather than look.
 
 ### Embedding on a dashboard
 
