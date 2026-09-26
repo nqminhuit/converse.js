@@ -376,4 +376,32 @@ $skin-file-progress: '.message.chat-msg:has(> .chat-msg__content > progress)';
         background: var(--skin-accent-soft);
         border-color: transparent;
     }
+
+    // `/help` menu close (×): upstream paints it the panel colour
+    // (`--background-color` in 1:1 chats, `--muc-color` in MUCs), so on the
+    // skin's dark panel it disappears into the background. Repoint it at the
+    // muted text token instead. The chains mirror upstream's depth so this
+    // wins without `!important` on `color`; `converse-icon` writes its fill
+    // inline, so only `!important` reaches the `svg` (as in _composer.scss).
+    .chatbox .chat-body .chat-content .chat-content__help .close-chat-help,
+    converse-muc.chatroom .box-flyout .chatroom-body .chat-area .chat-content__help .close-chat-help {
+        color: var(--skin-muted-text);
+
+        &:hover,
+        &:focus-visible {
+            color: var(--foreground-color);
+        }
+
+        converse-icon svg,
+        svg {
+            fill: var(--skin-muted-text) !important;
+        }
+
+        &:hover converse-icon svg,
+        &:hover svg,
+        &:focus-visible converse-icon svg,
+        &:focus-visible svg {
+            fill: var(--foreground-color) !important;
+        }
+    }
 }
