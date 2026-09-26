@@ -44,6 +44,31 @@ describe('Chatboxes', function () {
         );
 
         it(
+            'passes /help through to Stacea instead of showing the local menu',
+            mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
+                const { api } = _converse;
+                await mock.waitForRoster(_converse, 'current', 1);
+                await mock.openControlBox(_converse);
+
+                // nqminhuit/nuc14ess#205: she answers /help herself, so the
+                // local menu must not shadow hers.
+                const stacea_jid = 'stacea@chit.prud.uk';
+                _converse.state.roster.create({ 'jid': stacea_jid, 'subscription': 'both' });
+                const view = await mock.openChatBoxFor(_converse, stacea_jid);
+                await mock.sendMessage(_converse, view, '/help');
+
+                expect(view.model.get('show_help_messages')).toBeFalsy();
+                expect(sizzle('.chat-info:not(.chat-date)', view).length).toBe(0);
+
+                const sent_stanzas = api.connection.get().sent_stanzas;
+                const sent = await u.waitUntil(() =>
+                    sent_stanzas.filter((s) => s.querySelector('body')?.textContent === '/help').pop(),
+                );
+                expect(sent.getAttribute('to')).toBe(stacea_jid);
+            }),
+        );
+
+        it(
             'has a /clear command',
             mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
                 await mock.waitForRoster(_converse, 'current', 1);
