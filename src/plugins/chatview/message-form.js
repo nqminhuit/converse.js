@@ -244,11 +244,29 @@ export default class MessageForm extends CustomElement {
      * @param {KeyboardEvent} ev
      */
     onKeyDown(ev) {
+        const { keycodes } = converse;
+        if (
+            ev.key === keycodes.ENTER &&
+            !ev.shiftKey &&
+            !ev.ctrlKey &&
+            !ev.altKey &&
+            !ev.metaKey &&
+            this.typeahead.is_open &&
+            this.typeahead.kind === 'commands' &&
+            this.typeahead.items[this.typeahead.index]?.name === this.typeahead.query
+        ) {
+            // An exact match runs at once, the old single-Enter flow: pick the
+            // command (leaving `/name ` behind) and submit it. A partial match
+            // only completes, and Tab never submits.
+            ev.preventDefault();
+            ev.stopImmediatePropagation?.();
+            this.typeahead.choose(this.typeahead.index);
+            return this.onFormSubmitted(ev);
+        }
         // The menu owns arrows / Enter / Tab / Escape while it is open, so they reach
         // neither Lexical nor the send-and-correct handling below.
         if (this.typeahead.onKeyDown(ev)) return;
 
-        const { keycodes } = converse;
         if (ev.key === keycodes.SHIFT) this.shiftDown = true;
 
         if (

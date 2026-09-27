@@ -106,4 +106,38 @@ describe('Slash-command suggestions in MUCs', function () {
             expect(suggestions(view)).toEqual(['/mute']);
         }),
     );
+
+    it(
+        'lists the full allowed list for an owner on a bare /',
+        mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
+            const { view } = await enterMUC(_converse);
+
+            await typeIntoComposer(view, '/');
+            // `getAllowedCommands` lists `/nick` twice for an owner-moderator
+            // (once as a base command, once via VISITOR_COMMANDS), so the menu
+            // shows it twice. What matters here is that nothing is truncated.
+            expect(suggestions(view)).toEqual([
+                '/admin',
+                '/ban',
+                '/clear',
+                '/deop',
+                '/destroy',
+                '/help',
+                '/kick',
+                '/me',
+                '/member',
+                '/modtools',
+                '/mute',
+                '/nick',
+                '/nick',
+                '/op',
+                '/owner',
+                '/register',
+                '/revoke',
+                '/subject',
+                '/topic',
+                '/voice',
+            ]);
+        }),
+    );
 });

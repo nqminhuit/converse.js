@@ -96,11 +96,20 @@ describe('Slash-command suggestions in 1:1 chats', function () {
             const view = await openChat(_converse, stacea_jid);
 
             await typeIntoComposer(view, '/');
-            const offered = suggestions(view);
-            expect(offered).toContain('/avatar');
-            expect(offered).toContain('/clear');
-            expect(offered).toContain('/close');
-            expect(offered).not.toContain('/me');
+            expect(suggestions(view)).toEqual([
+                '/avatar',
+                '/clear',
+                '/close',
+                '/help',
+                '/refresh',
+                '/relax',
+                '/remind',
+                '/reminders',
+                '/status',
+                '/tools',
+                '/unremind',
+                '/work',
+            ]);
 
             await typeIntoComposer(view, '/too');
             expect(suggestions(view)).toEqual(['/tools']);
@@ -109,7 +118,32 @@ describe('Slash-command suggestions in 1:1 chats', function () {
             expect(suggestions(view)).toEqual(['/status']);
 
             await typeIntoComposer(view, '/');
-            expect(detailFor(view, '/help')).toBe('Ask Stacea for help');
+            expect(detailFor(view, '/help')).toBe('this list');
+            expect(detailFor(view, '/work')).toBe('back to work: tools on');
+            expect(detailFor(view, '/relax')).toBe('off work: I just chat, no tools');
+        }),
+    );
+
+    it(
+        'runs an exact match on a single Enter but only completes a partial one',
+        mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
+            await mock.waitForRoster(_converse, 'current', 1);
+            const contact_jid = mock.cur_names[0].replace(/ /g, '.').toLowerCase() + '@montague.lit';
+            const view = await openChat(_converse, contact_jid);
+            spyOn(_converse.api, 'confirm').and.callFake(() => Promise.resolve(true));
+
+            await typeIntoComposer(view, '/clear');
+            expect(suggestions(view)).toEqual(['/clear']);
+            await mock.pressComposerKey(view, 'Enter');
+            await u.waitUntil(() => _converse.api.confirm.calls.count() === 1);
+
+            _converse.api.confirm.calls.reset();
+            await typeIntoComposer(view, '/clea');
+            expect(suggestions(view)).toEqual(['/clear']);
+            await mock.pressComposerKey(view, 'Enter');
+            const form = mock.getMessageForm(view);
+            await u.waitUntil(() => form.rawText() === '/clear ');
+            expect(_converse.api.confirm.calls.count()).toBe(0);
         }),
     );
 });

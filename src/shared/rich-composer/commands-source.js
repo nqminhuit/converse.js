@@ -12,9 +12,8 @@
  */
 import { __ } from 'i18n';
 import { isStaceaChat } from 'plugins/chatview/utils.js';
-import { MAX_SUGGESTIONS } from './typeahead.js';
 
-const COMMAND_QUERY = /^\/([A-Za-z]*)$/;
+const COMMAND_QUERY = /^\/([A-Za-z0-9_-]*)$/;
 
 /**
  * Snapshot of Stacea's backend commands (see the `commands` object in
@@ -82,18 +81,18 @@ function getMUCDetails () {
  */
 function getStaceaDetails () {
     return {
-        'avatar': __('Show your avatar'),
+        'avatar': __('change my avatar: /avatar, /avatar N, /avatar list'),
         'clear': __('Remove messages'),
         'close': __('Close this chat'),
-        'help': __('Ask Stacea for help'),
-        'refresh': __('Refresh Stacea'),
-        'relax': __('Take a break'),
-        'remind': __('Set a reminder'),
-        'reminders': __('List your reminders'),
-        'status': __('Show status'),
-        'tools': __('Show Stacea tools'),
-        'unremind': __('Remove a reminder'),
-        'work': __('Show work summary'),
+        'help': __('this list'),
+        'refresh': __('start fresh: I forget our chat so far'),
+        'relax': __('off work: I just chat, no tools'),
+        'remind': __('set a reminder: /remind 30m stretch'),
+        'reminders': __('list pending reminders'),
+        'status': __('my health: models, usage, limits, errors'),
+        'tools': __('list the tools I can use right now'),
+        'unremind': __('cancel one: /unremind 3'),
+        'work': __('back to work: tools on'),
     };
 }
 
@@ -153,7 +152,9 @@ export function makeCommandsSource (getModel) {
             ranked.sort(
                 (a, b) => a.idx - b.idx || (a.command.name < b.command.name ? -1 : 1),
             );
-            return ranked.slice(0, MAX_SUGGESTIONS).map(({ command }) => ({
+            // No cap: the menu scrolls (see `TypeaheadController#revealActive`),
+            // so a bare `/` must show every match instead of silently hiding some.
+            return ranked.map(({ command }) => ({
                 'label': `/${command.name}`,
                 'detail': command.detail,
                 'name': command.name,

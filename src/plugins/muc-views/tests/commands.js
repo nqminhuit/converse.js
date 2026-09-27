@@ -13,8 +13,6 @@ describe('Groupchats', function () {
                 const view = _converse.chatboxviews.get('lounge@montague.lit');
                 await mock.setComposerText(view, '/help');
                 await mock.pressComposerKey(view, 'Enter');
-                // The first Enter picks the suggestion; the second submits it.
-                await mock.pressComposerKey(view, 'Enter');
 
                 await u.waitUntil(() => sizzle('converse-chat-help .chat-info', view).length);
                 let chat_help_el = view.querySelector('converse-chat-help');
@@ -53,8 +51,6 @@ describe('Groupchats', function () {
 
                 await mock.setComposerText(view, '/help');
                 await mock.pressComposerKey(view, 'Enter');
-                // The first Enter picks the suggestion; the second submits it.
-                await mock.pressComposerKey(view, 'Enter');
                 chat_help_el = await u.waitUntil(() => view.querySelector('converse-chat-help'));
                 info_messages = sizzle('.chat-info', chat_help_el);
                 expect(info_messages.length).toBe(18);
@@ -85,8 +81,6 @@ describe('Groupchats', function () {
 
                 await mock.setComposerText(view, '/help');
                 await mock.pressComposerKey(view, 'Enter');
-                // The first Enter picks the suggestion; the second submits it.
-                await mock.pressComposerKey(view, 'Enter');
                 chat_help_el = await u.waitUntil(() => view.querySelector('converse-chat-help'));
                 info_messages = sizzle('.chat-info', chat_help_el);
                 expect(info_messages.length).toBe(9);
@@ -112,8 +106,6 @@ describe('Groupchats', function () {
 
                 await mock.setComposerText(view, '/help');
                 await mock.pressComposerKey(view, 'Enter');
-                // The first Enter picks the suggestion; the second submits it.
-                await mock.pressComposerKey(view, 'Enter');
                 await u.waitUntil(() => view.model.get('show_help_messages'));
                 chat_help_el = await u.waitUntil(() => view.querySelector('converse-chat-help'));
                 info_messages = sizzle('.chat-info', chat_help_el);
@@ -128,8 +120,6 @@ describe('Groupchats', function () {
                 await u.waitUntil(() => view.querySelector('converse-chat-help') === null);
 
                 await mock.setComposerText(view, '/help');
-                await mock.pressComposerKey(view, 'Enter');
-                // The first Enter picks the suggestion; the second submits it.
                 await mock.pressComposerKey(view, 'Enter');
                 chat_help_el = await u.waitUntil(() => view.querySelector('converse-chat-help'));
                 info_messages = sizzle('.chat-info', chat_help_el);
@@ -151,11 +141,7 @@ describe('Groupchats', function () {
                     spyOn(window, 'confirm').and.callFake(() => true);
                     await mock.setComposerText(view, '/clear');
                     await mock.pressComposerKey(view, 'Enter');
-                    // The first Enter picks the suggestion; the second submits it.
-                    await mock.pressComposerKey(view, 'Enter');
                     await mock.setComposerText(view, '/help');
-                    await mock.pressComposerKey(view, 'Enter');
-                    // The first Enter picks the suggestion; the second submits it.
                     await mock.pressComposerKey(view, 'Enter');
 
                     await u.waitUntil(() => sizzle('.chat-info:not(.chat-event)', view).length);
@@ -390,8 +376,6 @@ describe('Groupchats', function () {
                 // Check unsetting the topic
                 await mock.setComposerText(view, '/topic');
                 await mock.pressComposerKey(view, 'Enter');
-                // The first Enter picks the suggestion; the second submits it.
-                await mock.pressComposerKey(view, 'Enter');
                 sent_stanza = await u.waitUntil(() => sent_stanzas.pop());
                 expect(sent_stanza).toEqualStanza(stx`
                     <message to="lounge@montague.lit" type="groupchat" xmlns="jabber:client">
@@ -407,8 +391,6 @@ describe('Groupchats', function () {
                 const view = _converse.chatboxviews.get('lounge@montague.lit');
                 await mock.setComposerText(view, '/clear');
                 spyOn(_converse.api, 'confirm').and.callFake(() => Promise.resolve(false));
-                await mock.pressComposerKey(view, 'Enter');
-                // The first Enter picks the suggestion; the second submits it.
                 await mock.pressComposerKey(view, 'Enter');
                 await u.waitUntil(() => _converse.api.confirm.calls.count() === 1);
                 expect(_converse.api.confirm).toHaveBeenCalledWith(
@@ -448,8 +430,6 @@ describe('Groupchats', function () {
                 );
 
                 await mock.setComposerText(view, '/owner');
-                await mock.pressComposerKey(view, 'Enter');
-                // The first Enter picks the suggestion; the second submits it.
                 await mock.pressComposerKey(view, 'Enter');
                 await u.waitUntil(() => view.model.validateRoleOrAffiliationChangeArgs.calls.count());
                 const err_msg = await u.waitUntil(() => view.querySelector('.chat-error'));
@@ -544,8 +524,6 @@ describe('Groupchats', function () {
                 );
 
                 await mock.setComposerText(view, '/ban');
-                await mock.pressComposerKey(view, 'Enter');
-                // The first Enter picks the suggestion; the second submits it.
                 await mock.pressComposerKey(view, 'Enter');
                 await u.waitUntil(() => view.model.validateRoleOrAffiliationChangeArgs.calls.count());
                 await u.waitUntil(
@@ -655,8 +633,6 @@ describe('Groupchats', function () {
 
                 await mock.setComposerText(view, '/kick');
                 await mock.pressComposerKey(view, 'Enter');
-                // The first Enter picks the suggestion; the second submits it.
-                await mock.pressComposerKey(view, 'Enter');
                 await u.waitUntil(() => view.model.validateRoleOrAffiliationChangeArgs.calls.count());
                 await u.waitUntil(
                     () =>
@@ -744,8 +720,6 @@ describe('Groupchats', function () {
                 );
 
                 await mock.setComposerText(view, '/op');
-                await mock.pressComposerKey(view, 'Enter');
-                // The first Enter picks the suggestion; the second submits it.
                 await mock.pressComposerKey(view, 'Enter');
 
                 await u.waitUntil(() => view.model.validateRoleOrAffiliationChangeArgs.calls.count());
@@ -870,8 +844,6 @@ describe('Groupchats', function () {
                 );
 
                 await mock.setComposerText(view, '/mute');
-                await mock.pressComposerKey(view, 'Enter');
-                // The first Enter picks the suggestion; the second submits it.
                 await mock.pressComposerKey(view, 'Enter');
 
                 await u.waitUntil(() => view.model.validateRoleOrAffiliationChangeArgs.calls.count());
