@@ -17,6 +17,7 @@ import tplMessageForm from './templates/message-form.js';
 import { parseMessageForCommands } from './utils.js';
 import { TypeaheadController } from 'shared/rich-composer/typeahead.js';
 import { EMOJI_SOURCE } from 'shared/rich-composer/emoji-source.js';
+import { makeCommandsSource } from 'shared/rich-composer/commands-source.js';
 
 import './styles/message-form.scss';
 import 'shared/rich-composer/styles/typeahead.scss';
@@ -57,7 +58,7 @@ export default class MessageForm extends CustomElement {
      * @returns {import('shared/rich-composer/types').TypeaheadSource[]}
      */
     getTypeaheadSources() {
-        return [EMOJI_SOURCE];
+        return [makeCommandsSource(() => this.model), EMOJI_SOURCE];
     }
 
     async initialize() {
@@ -243,11 +244,29 @@ export default class MessageForm extends CustomElement {
      * @param {KeyboardEvent} ev
      */
     onKeyDown(ev) {
+        const { keycodes } = converse;
+        if (
+            ev.key === keycodes.ENTER &&
+            !ev.shiftKey &&
+            !ev.ctrlKey &&
+            !ev.altKey &&
+            !ev.metaKey &&
+            this.typeahead.is_open &&
+            this.typeahead.kind === 'commands' &&
+            this.typeahead.items[this.typeahead.index]?.name === this.typeahead.query
+        ) {
+            // An exact match runs at once, the old single-Enter flow: pick the
+            // command (leaving `/name ` behind) and submit it. A partial match
+            // only completes, and Tab never submits.
+            ev.preventDefault();
+            ev.stopImmediatePropagation?.();
+            this.typeahead.choose(this.typeahead.index);
+            return this.onFormSubmitted(ev);
+        }
         // The menu owns arrows / Enter / Tab / Escape while it is open, so they reach
         // neither Lexical nor the send-and-correct handling below.
         if (this.typeahead.onKeyDown(ev)) return;
 
-        const { keycodes } = converse;
         if (ev.key === keycodes.SHIFT) this.shiftDown = true;
 
         if (
