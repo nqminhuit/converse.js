@@ -1405,7 +1405,9 @@ describe('A Chat Message', function () {
                 const view = _converse.chatboxviews.get(sender_jid);
                 // Create enough messages so that there's a scrollbar.
                 const promises = [];
-                view.querySelector('.chat-content').scrollTop = 0;
+                const scroller = await u.waitUntil(() => view.querySelector('.chat-content__messages'));
+                scroller.style.height = '300px';
+                scroller.style.overflowY = 'auto';
                 view.model.ui.set('scrolled', true);
 
                 for (let i = 0; i < 20; i++) {
@@ -1422,13 +1424,19 @@ describe('A Chat Message', function () {
                     promises.push(new Promise((resolve) => view.model.messages.once('rendered', resolve)));
                 }
                 await Promise.all(promises);
+                await u.waitUntil(() => scroller.scrollHeight > scroller.clientHeight);
 
                 const indicator_el = await u.waitUntil(() => view.querySelector('.new-msgs-indicator'));
                 expect(view.model.ui.get('scrolled')).toBe(true);
-                expect(view.querySelector('.chat-content').scrollTop).toBe(0);
+                // Scrolled up, to the oldest messages. The message area is a
+                // `column-reverse` scroller, so scrolling up is a negative offset.
+                scroller.scrollTop = -scroller.scrollHeight;
+                expect(scroller.scrollTop).toBeLessThan(0);
+
                 indicator_el.click();
                 await u.waitUntil(() => !view.querySelector('.new-msgs-indicator'));
                 await u.waitUntil(() => !view.model.get('scrolled'));
+                await u.waitUntil(() => Math.abs(scroller.scrollTop) < 1);
             }),
         );
 

@@ -4,9 +4,15 @@ export function isMobileViewport(): boolean;
  */
 export function getChatStyle(model: import("@converse/headless/types/shared/chatbox").default): string;
 /**
+ * Caps an unread message count, so that badges don't grow unbounded.
+ * @param {number} count
+ * @returns {string|number}
+ */
+export function capUnreadCount(count: number): string | number;
+/**
  * @param {import('@converse/headless').Model} model
  */
-export function getUnreadMsgsDisplay(model: import("@converse/headless").Model): any;
+export function getUnreadMsgsDisplay(model: import("@converse/headless").Model): string | number;
 /**
  * @param {Promise<HeadingButtonAttributes>|HeadingButtonAttributes} promise_or_data
  * @returns {Promise<TemplateResult|''>}

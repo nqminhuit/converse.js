@@ -27,11 +27,19 @@ export function getChatStyle(model) {
 }
 
 /**
+ * Caps an unread message count, so that badges don't grow unbounded.
+ * @param {number} count
+ * @returns {string|number}
+ */
+export function capUnreadCount(count) {
+    return count < 100 ? count : '99+';
+}
+
+/**
  * @param {import('@converse/headless').Model} model
  */
 export function getUnreadMsgsDisplay(model) {
-    const num_unread = model.get('num_unread') || 0;
-    return num_unread < 100 ? num_unread : '99+';
+    return capUnreadCount(model.get('num_unread') || 0);
 }
 
 /**

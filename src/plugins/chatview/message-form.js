@@ -377,6 +377,13 @@ export default class MessageForm extends CustomElement {
             hint_el.value = '';
             this.clearInput();
             this.model.save({ 'draft': '' });
+            if (message) {
+                // We always want to scroll down when the user writes a message, as opposed to when
+                // one is received, and the server's echo of ours updates the message we just created
+                // rather than arriving as a new one, so it never reaches `handleUnreadMessage`.
+                // Commands are left out: they add nothing to read, and `/clear` asks first.
+                this.model.ui.set('scrolled', false);
+            }
         }
 
         if (api.settings.get('view_mode') === 'overlayed') {

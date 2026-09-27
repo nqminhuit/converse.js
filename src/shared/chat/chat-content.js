@@ -3,6 +3,7 @@ import { api, u } from "@converse/headless";
 import tplSpinner from "templates/spinner.js";
 import { CustomElement } from "../components/element.js";
 import { onScrolledDown } from "./utils.js";
+import tplScrollDownButton from "./templates/scroll-down-button.js";
 import "./message-history.js";
 
 import "./styles/chat-content.scss";
@@ -19,7 +20,6 @@ export default class ChatContent extends CustomElement {
     constructor() {
         super();
         this.model = null;
-        this.scrollTop = 0;
         this.scroll_debounce = null;
 
         // Index of the top message in the virtualized list window.
@@ -31,10 +31,10 @@ export default class ChatContent extends CustomElement {
         this.window_bottom = 0;
 
         this.scrollHandler = /** @param {Event} ev */ (ev) => {
-            if (this.mark_scrolled_debounce) {
+            if (this.scroll_debounce) {
                 clearTimeout(this.scroll_debounce);
             }
-            this.mark_scrolled_debounce = setTimeout(() => {
+            this.scroll_debounce = setTimeout(() => {
                 this.#markScrolled(ev);
             }, 250);
 
@@ -50,6 +50,15 @@ export default class ChatContent extends CustomElement {
         };
     }
 
+    /**
+     * The number of messages the user hasn't seen yet, as shown on the
+     * scroll-down button's badge.
+     * @returns {number}
+     */
+    get unreadCount() {
+        return this.model?.get("num_unread") || 0;
+    }
+
     async initialize() {
         await this.model.initialized;
         await this.model.messages.fetched;
@@ -60,6 +69,8 @@ export default class ChatContent extends CustomElement {
         this.listenTo(this.model.messages, "change", () => this.requestUpdate());
         this.listenTo(this.model.messages, "rendered", () => u.debounce(() => this.requestUpdate(), 50));
         this.listenTo(this.model, "historyPruned", () => this.#setWindow());
+        this.listenTo(this.model, "change:num_unread", () => this.requestUpdate());
+        this.listenTo(this.model, "change:num_unread_general", () => this.requestUpdate());
         this.listenTo(this.model.notifications, "change", () => this.requestUpdate());
         this.listenTo(this.model.ui, "change", () => this.requestUpdate());
         this.listenTo(this.model.ui, "change:scrolled", () => this.scrollDown());
@@ -82,6 +93,7 @@ export default class ChatContent extends CustomElement {
                 ></converse-message-history>
             </div>
             ${this.model.ui?.get("chat-content-spinner-top") ? tplSpinner() : ""}
+            ${this.model.ui.get("scrolled") ? tplScrollDownButton(this) : ""}
         `;
     }
 
@@ -123,12 +135,23 @@ export default class ChatContent extends CustomElement {
     }
 
     /**
+     * The element which actually scrolls. The host itself has no overflow,
+     * because its only child (`.chat-content__messages`) fills it, so
+     * scrolling the host is a no-op.
+     * @returns {HTMLElement}
+     */
+    #getScroller() {
+        return /** @type {HTMLElement} */ (this.querySelector(".chat-content__messages"));
+    }
+
+    /**
      * Sets new window bounds based on whether the scrollbar is at the top or bottom, or otherwise based on which
      * messages are visible within the scrollable area.
      */
     #setWindow() {
         const total_messages = this.model.messages.length;
-        const container = /** @type {HTMLElement} */ (this.querySelector(".chat-content__messages"));
+        const container = this.#getScroller();
+        if (!container) return;
 
         // The amount before the actual top/bottom where we are close enough to
         // want to update the window. Set to 25% of the scrollable container.
@@ -157,16 +180,21 @@ export default class ChatContent extends CustomElement {
         }
     }
 
-    scrollDown() {
+    async scrollDown() {
         if (this.model.ui.get("scrolled")) {
             return;
         }
-        if (this.scrollTo) {
-            const behavior = this.scrollTop ? "smooth" : "auto";
-            this.scrollTo({ top: 0, behavior });
-        } else {
-            this.scrollTop = 0;
-        }
+        // Show the newest messages first, else we scroll to the bottom of a
+        // window full of old messages and then watch it swap.
+        this.window_bottom = this.model.messages.length - 1;
+        this.window_top = Math.max(0, this.window_bottom - WINDOW_SIZE);
+
+        await this.updateComplete;
+        const scroller = this.#getScroller();
+        // Jump rather than animate: a smooth scroll gets cancelled as soon as
+        // the content relayouts (the new message finishing its render), which
+        // leaves the chat short of the end, with the button still showing.
+        scroller?.scrollTo({ top: 0 });
         /**
          * Triggered once the converse-chat-content element has been scrolled down to the bottom.
          * @event _converse#chatBoxScrolledDown
@@ -175,6 +203,18 @@ export default class ChatContent extends CustomElement {
          * @example _converse.api.listen.on('chatBoxScrolledDown', obj => { ... });
          */
         api.trigger("chatBoxScrolledDown", { chatbox: this.model });
+    }
+
+    /**
+     * Called when the user clicks the button which appears once they've
+     * scrolled up, to return them to the newest message.
+     * @param {Event} [ev]
+     */
+    scrollToLatest(ev) {
+        ev?.preventDefault?.();
+        // Clearing "scrolled" makes the `change:scrolled` listener scroll down.
+        this.model.ui.set("scrolled", false);
+        onScrolledDown(this.model);
     }
 }
 

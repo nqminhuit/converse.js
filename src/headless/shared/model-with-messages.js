@@ -871,6 +871,10 @@ export default function ModelWithMessages(BaseModel) {
                     // gets scrolled down. We always want to scroll down
                     // when the user writes a message as opposed to when a
                     // message is received.
+                    //
+                    // Only for our own *other* resources: their messages don't deduplicate into the
+                    // ones we sent from here (the origin-id query matches on `from` too). Ours are
+                    // cleared in the composer instead, since the echo updates the message we created.
                     this.ui.set('scrolled', false);
                 } else if (this.isHidden()) {
                     this.incrementUnreadMsgsCounter(message);

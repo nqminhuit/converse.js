@@ -9,6 +9,15 @@ import './styles/muc-chat-content.scss';
 const { ROOMSTATUS } = constants;
 
 export default class MUCChatContent extends ChatContent {
+    /**
+     * In a MUC, `num_unread` counts only mentions, so the general unread
+     * counter is the meaningful one for the scroll-down button's badge.
+     * @returns {number}
+     */
+    get unreadCount() {
+        return this.model?.get('num_unread_general') || 0;
+    }
+
     async initialize() {
         await super.initialize();
         this.listenTo(this.model, 'change:hidden_occupants', () => this.requestUpdate());

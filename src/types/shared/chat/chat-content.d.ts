@@ -16,14 +16,25 @@ export default class ChatContent extends CustomElement {
         };
     };
     model: any;
-    scroll_debounce: any;
+    scroll_debounce: number;
     window_top: number;
     window_bottom: number;
     scrollHandler: (ev: Event) => void;
-    mark_scrolled_debounce: number;
+    /**
+     * The number of messages the user hasn't seen yet, as shown on the
+     * scroll-down button's badge.
+     * @returns {number}
+     */
+    get unreadCount(): number;
     initialize(): Promise<void>;
     render(): import("lit-html").TemplateResult<1> | "";
-    scrollDown(): void;
+    scrollDown(): Promise<void>;
+    /**
+     * Called when the user clicks the button which appears once they've
+     * scrolled up, to return them to the newest message.
+     * @param {Event} [ev]
+     */
+    scrollToLatest(ev?: Event): void;
     #private;
 }
 import { CustomElement } from "../components/element.js";

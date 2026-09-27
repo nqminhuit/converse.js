@@ -1877,30 +1877,35 @@ describe('Groupchats', function () {
                     );
                 }
                 await Promise.all(promises);
-                const promise = u.getOpenPromise();
 
-                // Give enough time for `markScrolled` to have been called
-                setTimeout(async () => {
-                    const content = view.querySelector('.chat-content');
-                    content.scrollTop = 0;
-                    await view.model.handleMessageStanza(
-                        stx`<message from="lounge@montague.lit/someone"
-                                to="romeo@montague.lit.com"
-                                type="groupchat"
-                                id="${u.getUniqueId()}"
-                                xmlns="jabber:client">
-                            <body>${message}</body>
-                    </message>`,
-                    );
-                    await u.waitUntil(() => view.querySelectorAll('.chat-msg__text').length === 21);
-                    // Now check that the message appears inside the chatbox in the DOM
-                    const msg_txt = sizzle('.chat-msg:last .chat-msg__text', content).pop().textContent;
-                    expect(msg_txt).toEqual(message);
-                    expect(content.scrollTop).toBe(0);
-                    promise.resolve();
-                }, 500);
+                const scroller = await u.waitUntil(() => view.querySelector('.chat-content__messages'));
+                scroller.style.height = '300px';
+                scroller.style.overflowY = 'auto';
+                await u.waitUntil(() => scroller.scrollHeight > scroller.clientHeight);
+                await u.waitUntil(() => view.querySelectorAll('.chat-msg__text').length === 20);
 
-                return promise;
+                // Scrolled up, to the oldest messages. The message area is a
+                // `column-reverse` scroller, so scrolling up is a negative offset.
+                scroller.scrollTop = -scroller.scrollHeight;
+                await u.waitUntil(() => view.model.ui.get('scrolled'));
+                expect(scroller.scrollTop).toBeLessThan(0);
+
+                await view.model.handleMessageStanza(
+                    stx`<message from="lounge@montague.lit/someone"
+                            to="romeo@montague.lit.com"
+                            type="groupchat"
+                            id="${u.getUniqueId()}"
+                            xmlns="jabber:client">
+                        <body>${message}</body>
+                </message>`,
+                );
+                await u.waitUntil(() => view.querySelectorAll('.chat-msg__text').length === 21);
+                // Now check that the message appears inside the chatbox in the DOM
+                const msg_txt = sizzle('.chat-msg:last .chat-msg__text', scroller).pop().textContent;
+                expect(msg_txt).toEqual(message);
+                // ... and that we weren't dragged down to it.
+                expect(view.model.ui.get('scrolled')).toBe(true);
+                expect(scroller.scrollTop).toBeLessThan(0);
             }),
         );
 
