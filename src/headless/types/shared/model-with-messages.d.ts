@@ -146,7 +146,14 @@ export default function ModelWithMessages<T extends import("./types").ModelExten
          * @returns {Promise<boolean>}
          */
         shouldShowErrorMessage(attrs: import("./types").MessageAttributes): Promise<boolean>;
-        clearMessages(): Promise<void>;
+        /**
+         * @param {Object} [options]
+         * @param {boolean} [options.user_initiated] Whether the user emptied the
+         *      conversation themselves, as opposed to a setting doing it.
+         */
+        clearMessages({ user_initiated }?: {
+            user_initiated?: boolean;
+        }): Promise<void>;
         editEarlierMessage(): void;
         editLaterMessage(): any;
         /**

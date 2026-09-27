@@ -1032,7 +1032,36 @@ describe('Chatboxes', function () {
                 );
                 await u.waitUntil(() => view.model.messages.length === 0);
                 await u.waitUntil(() => !view.querySelectorAll('.chat-msg__body').length);
+
+                // The clear is remembered, so that a reload doesn't fetch the
+                // pre-clear history back from the archive.
+                expect(view.model.get('cleared_at')).toBeTruthy();
             }),
+        );
+
+        it(
+            "'/clear' is remembered, but clearing via clear_messages_on_reconnection isn't",
+            mock.initConverse(
+                converse,
+                ['chatBoxesFetched'],
+                { 'clear_messages_on_reconnection': true },
+                async function (_converse) {
+                    await mock.waitForRoster(_converse, 'current');
+                    await mock.openControlBox(_converse);
+                    const contact_jid = mock.cur_names[0].replace(/ /g, '.').toLowerCase() + '@montague.lit';
+
+                    await mock.openChatBoxFor(_converse, contact_jid);
+                    const view = _converse.chatboxviews.get(contact_jid);
+                    await mock.sendMessage(_converse, view, 'This message is another sent from this chatbox');
+                    expect(view.model.messages.length).toBe(1);
+
+                    // Closing the chatbox clears the cache, but that clear only wants
+                    // a clean slate - the pre-clear history must still be fetchable.
+                    await view.model.close();
+                    expect(view.model.messages.length).toBe(0);
+                    expect(view.model.get('cleared_at')).toBe(undefined);
+                },
+            ),
         );
     });
 

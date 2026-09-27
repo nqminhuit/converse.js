@@ -2,6 +2,14 @@
 
 ## 15.0.0 (Unreleased)
 
+- fix(chatview): `/clear` now stays cleared. It only ever emptied the local cache, and a reload
+  then asked the server's archive for the newest page with no `start` date, which handed the
+  pre-clear history straight back. A user-initiated clear is now remembered on the conversation
+  and used as the archive cutoff, and a cleared room whose service has no MAM is joined with
+  `maxstanzas="0"` so it can't re-send its own history. Note this filters the archive
+  client-side: the messages are still stored server-side. Clears driven by
+  `clear_messages_on_reconnection` or `muc_clear_messages_on_leave` are unaffected and still
+  only give you a clean slate.
 - #194: Full support for XEP-0115: Entity capabilities.
 - #1247: Register Converse as the browser's handler for `xmpp:` links.
 - #1509: You can now chat with a bare-host JID.

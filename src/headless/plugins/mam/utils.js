@@ -287,6 +287,13 @@ export function fetchNewestMessages(model) {
             should_page,
         );
     } else {
-        return fetchArchivedMessages(model, { rsm: { before: '' } }, should_page);
+        // An empty cache isn't the same as an empty conversation: with no `start`
+        // the server hands back the last page of the archive. `cleared_at` is how we
+        // remember the user emptied this conversation on purpose.
+        return fetchArchivedMessages(
+            model,
+            { mam: { start: model.get('cleared_at') }, rsm: { before: '' } },
+            should_page,
+        );
     }
 }
