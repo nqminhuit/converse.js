@@ -17,6 +17,7 @@ import tplMessageForm from './templates/message-form.js';
 import { parseMessageForCommands } from './utils.js';
 import { TypeaheadController } from 'shared/rich-composer/typeahead.js';
 import { EMOJI_SOURCE } from 'shared/rich-composer/emoji-source.js';
+import { makeCommandsSource } from 'shared/rich-composer/commands-source.js';
 
 import './styles/message-form.scss';
 import 'shared/rich-composer/styles/typeahead.scss';
@@ -57,7 +58,7 @@ export default class MessageForm extends CustomElement {
      * @returns {import('shared/rich-composer/types').TypeaheadSource[]}
      */
     getTypeaheadSources() {
-        return [EMOJI_SOURCE];
+        return [makeCommandsSource(() => this.model), EMOJI_SOURCE];
     }
 
     async initialize() {

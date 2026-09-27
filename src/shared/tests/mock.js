@@ -243,6 +243,7 @@ async function pressComposerKey(view, key, extra = {}) {
         key,
         preventDefault: () => {},
         stopPropagation: () => {},
+        stopImmediatePropagation: () => {},
         ...extra,
     });
 }

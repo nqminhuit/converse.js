@@ -110,6 +110,8 @@ describe('Chatboxes', function () {
 
             await mock.setComposerText(view, '/clear');
                 await mock.pressComposerKey(view, 'Enter');
+                // The first Enter picks the `/clear` suggestion; the second submits it.
+                await mock.pressComposerKey(view, 'Enter');
                 await u.waitUntil(() => _converse.api.confirm.calls.count() === 1);
                 await u.waitUntil(() => sizzle('converse-chat-message', view).length === 0);
                 expect(true).toBe(true);
@@ -1024,6 +1026,8 @@ describe('Chatboxes', function () {
                 message = '/clear';
                 spyOn(_converse.api, 'confirm').and.callFake(() => Promise.resolve(true));
                 await mock.setComposerText(view, message);
+                await mock.pressComposerKey(view, 'Enter');
+                // The first Enter picks the `/clear` suggestion; the second submits it.
                 await mock.pressComposerKey(view, 'Enter');
                 await u.waitUntil(() => _converse.api.confirm.calls.count() === 1);
                 expect(_converse.api.confirm).toHaveBeenCalledWith(
