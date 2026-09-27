@@ -20,9 +20,8 @@
   `handleUnreadMessage`, which only runs for newly created messages, but the server's echo of our own
   message updates the message we had just created instead of arriving as a new one, so it never got
   there. The composer clears the flag itself now, which also means a send prunes history according to
-  `pruning_behavior` (as any other scroll to the end does), including when sent with an image or file
-  rather than a body. Commands that add nothing to the conversation, such as `/clear`, leave your
-  reading position alone.
+  `pruning_behavior` (as any other scroll to the end does). Commands that add nothing to the
+  conversation, such as `/clear`, leave your reading position alone.
 - feat(chatview): A button appears in the bottom-right corner of the message area when you scroll
   up, taking you back to the latest message. It shows the number of unread messages while there
   are any, and works in 1:1 chats, MUCs, MUC occupants and headline chats.
