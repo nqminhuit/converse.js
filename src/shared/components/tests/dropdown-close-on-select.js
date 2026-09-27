@@ -28,7 +28,7 @@ async function openMessageActions(view, msgid) {
 
 describe('A Dropdown menu', function () {
     it(
-        "closes after the message actions' Copy item is clicked",
+        'copies via the standalone message action without opening the dropdown',
         mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
             const contact_jid = await getContactJID(_converse);
             await mock.openChatBoxFor(_converse, contact_jid);
@@ -47,13 +47,17 @@ describe('A Dropdown menu', function () {
 
             const clipboard_spy = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue(undefined);
 
-            const { dropdown_el } = await openMessageActions(view, 'dropdown-close-copy-msg');
-            const copy_el = await u.waitUntil(() => dropdown_el.querySelector('.chat-msg__action-copy'));
+            const msg_el = await u.waitUntil(() =>
+                view.querySelector(`.chat-msg[data-msgid="dropdown-close-copy-msg"]`),
+            );
+            const actions_el = await u.waitUntil(() => msg_el?.querySelector('converse-message-actions'));
+            // Copy lives outside the dropdown, so no need to expand the menu.
+            const copy_el = await u.waitUntil(() => actions_el.querySelector(':scope > .chat-msg__action-copy'));
+            expect(actions_el.querySelector('converse-dropdown .chat-msg__action-copy')).toBeNull();
             copy_el.click();
 
             await u.waitUntil(() => clipboard_spy.mock.calls.length > 0);
             expect(clipboard_spy).toHaveBeenCalledWith('Copy me');
-            await u.waitUntil(() => !dropdown_el.querySelector('.dropdown-menu').classList.contains('show'));
         }),
     );
 

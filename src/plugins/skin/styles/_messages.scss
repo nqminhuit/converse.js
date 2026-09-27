@@ -213,8 +213,9 @@ $skin-file-progress: '.message.chat-msg:has(> .chat-msg__content > progress)';
         margin-inline-start: 0;
         opacity: 0;
 
-        // The reactions plugin always appends its picker, so key the pill chrome on the menu.
-        &:has(.chat-msg__actions) {
+        // The reactions plugin always appends its picker, so key the pill chrome on the
+        // menu or the standalone copy button.
+        &:has(.chat-msg__actions, .chat-msg__action-copy) {
             display: flex;
             align-items: center;
             gap: var(--skin-space-1);
@@ -225,7 +226,8 @@ $skin-file-progress: '.message.chat-msg:has(> .chat-msg__content > progress)';
             box-shadow: var(--skin-shadow-1);
         }
 
-        .chat-msg__actions .btn--standalone {
+        .chat-msg__actions .btn--standalone,
+        > .chat-msg__action-copy.btn--standalone {
             opacity: 1;
             margin-top: 0;
         }
