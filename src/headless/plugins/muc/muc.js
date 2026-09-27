@@ -236,7 +236,9 @@ class MUC extends ModelWithVCard(ModelWithMessages(ColorAwareModel(ChatBoxBase))
      */
     async constructJoinPresence(password, is_new) {
         // A room without MAM re-sends its own history on rejoin, which no MAM cutoff
-        // can reach, so `cleared_at` has to be handled here too.
+        // can reach, so `cleared_at` has to be handled here too. It is set by a
+        // confirmed `/clear` in the room - a MUC composer has no `clear` command of
+        // its own, so it falls through to the 1:1 handler, which does record it.
         const exclude_maxstanzas = is_new || this.features.get('mam_enabled') || this.get('cleared_at');
         const maxstanzas = exclude_maxstanzas ? 0 : api.settings.get('muc_history_max_stanzas');
         password = password || this.get('password');

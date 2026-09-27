@@ -401,6 +401,33 @@ describe('Groupchats', function () {
         );
 
         it(
+            'remembers a confirmed /clear in a room, so the archive does not hand it back',
+            mock.initConverse(converse, [], {}, async function (_converse) {
+                const muc_jid = 'lounge@montague.lit';
+                await mock.openAndEnterMUC(_converse, muc_jid, 'romeo');
+                const view = _converse.chatboxviews.get(muc_jid);
+                const nick = mock.chatroom_names[0];
+                await view.model.handleMessageStanza(stx`<message from="${muc_jid}/${nick}"
+                        to="romeo@montague.lit"
+                        type="groupchat"
+                        id="${u.getUniqueId()}"
+                        xmlns="jabber:client">
+                    <body>Hello world</body>
+                </message>`);
+                expect(view.model.messages.length).toBe(1);
+
+                // A MUC composer has no `clear` branch of its own, so `/clear` falls
+                // through the `parseMessageForCommands` hook to the 1:1 handler, which
+                // is what records `cleared_at` on the room.
+                spyOn(_converse.api, 'confirm').and.callFake(() => Promise.resolve(true));
+                await mock.setComposerText(view, '/clear');
+                await mock.pressComposerKey(view, 'Enter');
+                await u.waitUntil(() => view.model.messages.length === 0);
+                expect(view.model.get('cleared_at')).toBeTruthy();
+            }),
+        );
+
+        it(
             'leaves the reading position alone for a command that sends no message',
             mock.initConverse(converse, [], {}, async function (_converse) {
                 await mock.openAndEnterMUC(_converse, 'lounge@montague.lit', 'romeo');
