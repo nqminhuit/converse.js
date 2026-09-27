@@ -1,7 +1,6 @@
 import { _converse, api, constants } from '@converse/headless';
 import { CustomElement } from '../components/element.js';
 import { MOBILE_CUTOFF } from 'shared/constants.js';
-import { onScrolledDown } from './utils.js';
 
 const { CHATROOMS_TYPE, INACTIVE } = constants;
 
@@ -71,22 +70,6 @@ export default class BaseChatView extends CustomElement {
         } else {
             return this.querySelector('converse-chat-bottom-panel');
         }
-    }
-
-    /**
-     * Scrolls the chat down.
-     *
-     * This method will always scroll the chat down, regardless of
-     * whether the user scrolled up manually or not.
-     * @param { Event } [ev] - An optional event that is the cause for needing to scroll down.
-     */
-    scrollDown(ev) {
-        ev?.preventDefault?.();
-        ev?.stopPropagation?.();
-        if (this.model.ui.get('scrolled')) {
-            this.model.ui.set({ scrolled: false });
-        }
-        onScrolledDown(this.model);
     }
 
     onWindowStateChanged() {

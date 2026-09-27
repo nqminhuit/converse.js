@@ -2,6 +2,8 @@
 
 ## 15.0.0 (Unreleased)
 
+- chore(chatview): Removed the dead `BaseChatView.scrollDown()`. Nothing called it since
+  scrolling moved into `ChatContent`, whose own `scrollDown()` is the replacement.
 - fix(chatview): `/clear` now stays cleared. It only ever emptied the local cache, and a reload
   then asked the server's archive for the newest page with no `start` date, which handed the
   pre-clear history straight back. A user-initiated clear is now remembered on the conversation
