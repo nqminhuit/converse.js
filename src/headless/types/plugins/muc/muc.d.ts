@@ -122,7 +122,9 @@ declare const MUC_base: {
         onScrolledChanged(): void;
         pruneHistoryWhenScrolledDown(): void;
         shouldShowErrorMessage(attrs: import("../../shared/types").MessageAttributes): Promise<boolean>;
-        clearMessages(): Promise<void>;
+        clearMessages({ user_initiated }?: {
+            user_initiated?: boolean;
+        }): Promise<void>;
         editEarlierMessage(): void;
         editLaterMessage(): any;
         isChatMessage(_message: import("../../index.js").BaseMessage): boolean;

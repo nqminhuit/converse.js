@@ -38,7 +38,9 @@ declare const ChatBoxBase_base: {
         onScrolledChanged(): void;
         pruneHistoryWhenScrolledDown(): void;
         shouldShowErrorMessage(attrs: import("./types.js").MessageAttributes): Promise<boolean>;
-        clearMessages(): Promise<void>;
+        clearMessages({ user_initiated }?: {
+            user_initiated?: boolean;
+        }): Promise<void>;
         editEarlierMessage(): void;
         editLaterMessage(): any;
         isChatMessage(_message: import("./message.js").default): boolean;

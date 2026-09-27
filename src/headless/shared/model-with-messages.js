@@ -623,9 +623,22 @@ export default function ModelWithMessages(BaseModel) {
             return Promise.resolve(true);
         }
 
-        async clearMessages() {
+        /**
+         * @param {Object} [options]
+         * @param {boolean} [options.user_initiated] Whether the user emptied the
+         *      conversation themselves, as opposed to a setting doing it.
+         */
+        async clearMessages({ user_initiated = false } = {}) {
             try {
                 await this.messages.clearStore();
+                if (user_initiated) {
+                    // Remember the clear, so a reload doesn't refetch the pre-clear
+                    // history from the server's archive. Only for user-initiated clears:
+                    // the setting-driven ones (`clear_messages_on_reconnection`,
+                    // `muc_clear_messages_on_leave`) want a clean slate after a
+                    // reconnect, not the history gone.
+                    u.safeSave(this, { 'cleared_at': new Date().toISOString() });
+                }
             } catch (e) {
                 this.messages.trigger('reset');
                 log.error(e);
