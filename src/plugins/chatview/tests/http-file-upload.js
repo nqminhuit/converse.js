@@ -768,12 +768,16 @@ describe('XEP-0363: HTTP File Upload', function () {
                 await mock.waitUntilDiscoConfirmed(_converse, 'upload.montague.tld', [], [Strophe.NS.HTTPUPLOAD], []);
 
                 view.model.sendFiles([FILE]);
-                return await u.waitUntil(() =>
+                const iq = await u.waitUntil(() =>
                     api.connection
                         .get()
                         .IQ_stanzas.filter((s) => s.querySelector('iq[to="upload.montague.tld"] request'))
                         .pop(),
                 );
+                // The slot request only goes out once the placeholder exists, and it's the
+                // newest thing in the conversation, so grab it here rather than re-deriving
+                // it later: by the time the PUT completes, `sendMessage` may have run.
+                return { iq, placeholder: view.model.messages.last() };
             }
 
             /**
@@ -800,20 +804,18 @@ describe('XEP-0363: HTTP File Upload', function () {
                 mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
                     const { api } = _converse;
                     const { view, scroller } = await openChatScrolledUp(_converse);
-                    const iq = await sendFile(_converse, view);
+                    const { iq, placeholder } = await sendFile(_converse, view);
 
                     // The upload is mocked out, so we get to decide when it
                     // succeeds. Nothing may be scrolled to until then: the
                     // message doesn't exist before the upload finishes.
-                    const send_backup = XMLHttpRequest.prototype.send;
-                    XMLHttpRequest.prototype.send = function () {
-                        const placeholder = view.model.messages.last();
+                    spyOn(XMLHttpRequest.prototype, 'send').and.callFake(function () {
                         placeholder.save({
                             'upload': _converse.SUCCESS,
                             'oob_url': IMAGE_URL,
                             'body': IMAGE_URL,
                         });
-                    };
+                    });
                     api.connection.get()._dataRecv(mock.createRequest(_converse, slotStanza(iq)));
 
                     // Wait on the message rendering, which happens after the
@@ -825,7 +827,6 @@ describe('XEP-0363: HTTP File Upload', function () {
 
                     expect(view.model.ui.get('scrolled')).toBe(false);
                     expect(Math.abs(scroller.scrollTop)).toBeLessThan(1);
-                    XMLHttpRequest.prototype.send = send_backup;
                 }),
             );
 
@@ -834,15 +835,14 @@ describe('XEP-0363: HTTP File Upload', function () {
                 mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
                     const { api } = _converse;
                     const { view, scroller } = await openChatScrolledUp(_converse);
-                    const iq = await sendFile(_converse, view);
+                    const { iq } = await sendFile(_converse, view);
 
-                    const send_backup = XMLHttpRequest.prototype.send;
-                    XMLHttpRequest.prototype.send = function () {
+                    spyOn(XMLHttpRequest.prototype, 'send').and.callFake(function () {
                         Object.defineProperty(this, 'status', { value: 500 });
                         Object.defineProperty(this, 'responseText', { value: 'Quota exceeded' });
                         Object.defineProperty(this, 'readyState', { value: XMLHttpRequest.DONE });
                         this.onreadystatechange();
-                    };
+                    });
                     api.connection.get()._dataRecv(mock.createRequest(_converse, slotStanza(iq)));
 
                     await u.waitUntil(() => view.model.messages.last()?.get('type') === 'error');
@@ -850,7 +850,6 @@ describe('XEP-0363: HTTP File Upload', function () {
                     expect(view.model.messages.last().get('upload')).toBe(_converse.FAILURE);
                     expect(view.model.ui.get('scrolled')).toBe(true);
                     expect(scroller.scrollTop).toBeLessThan(0);
-                    XMLHttpRequest.prototype.send = send_backup;
                 }),
             );
         });
