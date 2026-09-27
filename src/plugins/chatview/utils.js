@@ -17,13 +17,13 @@ export async function clearMessages (chat) {
     }
 }
 
-// Fork exception for nqminhuit/nuc14ess#205: Stacea is a bot with her own
-// slash commands, including an authoritative `/help` (see the `commands`
-// object in `apps/stacea/internal/lines/lines.json`). Converse's local
-// `/help` menu would shadow hers, so in a 1:1 chat with her `/help` is sent
-// as a normal message instead of opening the local menu. Her reply is what
-// makes her commands discoverable. All other local commands (`/clear`,
-// `/close`) keep working in her chat.
+// Fork exception for nqminhuit/nuc14ess#205 and #232: Stacea is a bot with
+// her own slash commands, including authoritative `/help` and `/tools` (see
+// the `commands` object in `apps/stacea/internal/lines/lines.json`).
+// Converse's local `/help` menu would shadow hers, so in a 1:1 chat with her
+// `/help` and `/tools` are sent as normal messages instead of opening local
+// UI. Her reply is what makes her commands discoverable. All other local
+// commands (`/clear`, `/close`) keep working in her chat.
 export const STACEA_JID = 'stacea@chit.prud.uk';
 
 export function isStaceaChat (chat) {
@@ -67,6 +67,10 @@ export async function parseMessageForCommands (chat, text) {
             chat.set({ 'show_help_messages': false }, { 'silent': true });
             chat.set({ 'show_help_messages': true });
             return true;
+        } else if (match[1] === 'tools') {
+            if (isStaceaChat(chat)) {
+                return false; // Let `/tools` go to her instead of being swallowed locally.
+            }
         }
     }
     return false;
