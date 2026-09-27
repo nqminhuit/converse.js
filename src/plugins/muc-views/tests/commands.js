@@ -401,6 +401,49 @@ describe('Groupchats', function () {
         );
 
         it(
+            'leaves the reading position alone for a command that sends no message',
+            mock.initConverse(converse, [], {}, async function (_converse) {
+                await mock.openAndEnterMUC(_converse, 'lounge@montague.lit', 'romeo');
+                const view = _converse.chatboxviews.get('lounge@montague.lit');
+                const scroller = await u.waitUntil(() => view.querySelector('.chat-content__messages'));
+                scroller.style.height = '300px';
+                scroller.style.overflowY = 'auto';
+                const promises = [];
+                for (let i = 0; i < 30; i++) {
+                    promises.push(
+                        view.model.handleMessageStanza(stx`<message from="lounge@montague.lit/someone"
+                                to="romeo@montague.lit.com"
+                                type="groupchat"
+                                id="${u.getUniqueId()}"
+                                xmlns="jabber:client">
+                            <body>Message: ${i}</body>
+                        </message>`),
+                    );
+                }
+                await Promise.all(promises);
+                await u.waitUntil(() => view.querySelectorAll('.chat-msg').length === 30);
+                await u.waitUntil(() => scroller.scrollHeight > scroller.clientHeight);
+
+                // Scrolled up. The message area is a `column-reverse` scroller, so
+                // scrolling up is a negative offset.
+                scroller.scrollTop = -scroller.scrollHeight;
+                await u.waitUntil(() => view.model.ui.get('scrolled'));
+
+                // `/clear` puts a confirmation in front of it, and the user is
+                // entitled to dismiss that without being moved off what they
+                // were reading.
+                spyOn(_converse.api, 'confirm').and.callFake(() => Promise.resolve(false));
+                await mock.setComposerText(view, '/clear');
+                await mock.pressComposerKey(view, 'Enter');
+                await u.waitUntil(() => _converse.api.confirm.calls.count() === 1);
+
+                expect(view.model.ui.get('scrolled')).toBe(true);
+                expect(scroller.scrollTop).toBeLessThan(0);
+                expect(view.model.messages.length).toBe(30);
+            }),
+        );
+
+        it(
             'takes /owner to make a user an owner',
             mock.initConverse(converse, [], {}, async function (_converse) {
                 let sent_IQ, IQ_id;

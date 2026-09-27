@@ -134,6 +134,75 @@ describe('Scrolling the chat area to the latest message', function () {
         }),
     );
 
+    // `prune_messages_above` can't come from `initConverse`'s settings here: the
+    // messages arrive at the bottom of the message area, which counts as being
+    // scrolled down, so the history is already pruned down to the threshold by
+    // the time we can scroll up in it. Setting it once the chat is full leaves
+    // something above the threshold to prune.
+    describe('with a history to prune', function () {
+        const PRUNE_ABOVE = 5;
+
+        it(
+            'prunes the history when you send a message whilst scrolled up',
+            mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
+                const { view, scroller } = await openOverflowingChat(_converse);
+                await scrollUp(view, scroller);
+                _converse.api.settings.set('prune_messages_above', PRUNE_ABOVE);
+                expect(view.model.messages.length).toBeGreaterThan(PRUNE_ABOVE);
+
+                await mock.sendMessage(_converse, view, 'A new message from me');
+
+                // Pruning is debounced, and it follows the scroll to the end that
+                // sending causes.
+                await u.waitUntil(() => view.model.messages.length === PRUNE_ABOVE, 2000);
+                await u.waitUntil(() => atBottom(scroller));
+            }),
+        );
+
+        it(
+            'does not prune the history when a message is received whilst scrolled up',
+            mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
+                const { view, scroller, contact_jid } = await openOverflowingChat(_converse);
+                await scrollUp(view, scroller);
+                _converse.api.settings.set('prune_messages_above', PRUNE_ABOVE);
+
+                await _converse.handleMessageStanza(
+                    mock.createChatMessage(_converse, contact_jid, 'A message from someone else'),
+                );
+                await u.waitUntil(() => view.querySelectorAll('.chat-msg').length === NUM_MESSAGES + 1);
+
+                // No scroll to the end, so no pruning: this is what tells the two
+                // above apart.
+                await new Promise((resolve) => setTimeout(resolve, 1000));
+                expect(view.model.messages.length).toBe(NUM_MESSAGES + 1);
+                expect(view.model.ui.get('scrolled')).toBe(true);
+            }),
+        );
+
+        it(
+            'prunes on any message, sent or received, when pruning_behavior is "scrolled"',
+            mock.initConverse(
+                converse,
+                ['chatBoxesFetched'],
+                { 'pruning_behavior': 'scrolled' },
+                async function (_converse) {
+                    const { view, scroller, contact_jid } = await openOverflowingChat(_converse);
+                    await scrollUp(view, scroller);
+                    _converse.api.settings.set('prune_messages_above', PRUNE_ABOVE);
+
+                    // In this mode pruning is driven by messages arriving, not by
+                    // the scroll position, so it is not the composer clearing
+                    // "scrolled" that prunes here.
+                    await _converse.handleMessageStanza(
+                        mock.createChatMessage(_converse, contact_jid, 'A message from someone else'),
+                    );
+                    await u.waitUntil(() => view.model.messages.length === PRUNE_ABOVE, 2000);
+                    expect(view.model.ui.get('scrolled')).toBe(true);
+                },
+            ),
+        );
+    });
+
     it(
         'floats the button over the bottom-inline-end corner of the message area',
         mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
@@ -150,6 +219,11 @@ describe('Scrolling the chat area to the latest message', function () {
             expect(content_rect.bottom - rect.bottom).toBeLessThan(content_rect.height / 2);
             expect(content_rect.right - rect.right).toBeLessThan(content_rect.width / 2);
             expect(rect.height).toBeGreaterThan(16);
+
+            // The arrow takes the button's colour: `converse-icon` otherwise fills
+            // its glyph with `--secondary-color`, whatever the button declares.
+            const svg = /** @type {SVGElement} */ (button.querySelector('svg'));
+            expect(getComputedStyle(svg).fill).toBe(getComputedStyle(button).color);
         }),
     );
 });

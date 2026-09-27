@@ -31,6 +31,14 @@ converse-chat-content {
         opacity: 1;
     }
 
+    converse-icon svg {
+        // `converse-icon` fills its glyph with `--secondary-color`, which no
+        // amount of `color` on the button can reach. Left to the stylesheet
+        // rather than a `color` attribute on the icon, which would compile down
+        // to an inline style no stylesheet can override (see `message-actions`).
+        fill: currentColor;
+    }
+
     .chat-content__scroll-down__badge {
         position: absolute;
         top: -0.5em;
