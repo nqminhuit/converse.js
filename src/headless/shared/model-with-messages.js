@@ -573,6 +573,9 @@ export default function ModelWithMessages(BaseModel) {
                     'oob_url': message.get('oob_url'),
                 };
                 await this.sendMessage(attrs);
+                // Same reasoning as the composer: the file is now a real message in the
+                // conversation, so take the reader to it.
+                this.ui.set('scrolled', false);
                 message.destroy();
             }
         }

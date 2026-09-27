@@ -700,5 +700,158 @@ describe('XEP-0363: HTTP File Upload', function () {
                 }),
             );
         });
+
+        describe('When you send a file whilst scrolled up', function () {
+            const NUM_MESSAGES = 30;
+            const SCROLLER_HEIGHT = 300;
+            const FILE = {
+                'type': 'image/jpeg',
+                'size': '23456',
+                'lastModifiedDate': '',
+                'name': 'my-juliet.jpg',
+            };
+            const IMAGE_URL = 'https://conversejs.org/logo/conversejs-filled.svg';
+
+            /**
+             * Opens a 1:1 chat with enough history for the message area to
+             * overflow, then scrolls up to the oldest messages.
+             *
+             * The message area is a `column-reverse` scroller, so its scroll
+             * origin (the end of the conversation) is 0 and scrolling up gives
+             * a negative offset.
+             *
+             * @param {any} _converse
+             */
+            async function openChatScrolledUp(_converse) {
+                await mock.waitForRoster(_converse, 'current');
+                const contact_jid = mock.cur_names[2].replace(/ /g, '.').toLowerCase() + '@montague.lit';
+                await mock.openChatBoxFor(_converse, contact_jid);
+                const view = _converse.chatboxviews.get(contact_jid);
+
+                const scroller = await u.waitUntil(() => view.querySelector('.chat-content__messages'));
+                scroller.style.height = `${SCROLLER_HEIGHT}px`;
+                scroller.style.overflowY = 'auto';
+
+                await Promise.all(
+                    Array.from({ length: NUM_MESSAGES }, (_, i) =>
+                        _converse.handleMessageStanza(mock.createChatMessage(_converse, contact_jid, `Message: ${i}`)),
+                    ),
+                );
+                await u.waitUntil(() => view.querySelectorAll('.chat-msg').length === NUM_MESSAGES);
+                await u.waitUntil(() => scroller.scrollHeight > scroller.clientHeight);
+
+                scroller.scrollTop = -scroller.scrollHeight;
+                await u.waitUntil(() => view.model.ui.get('scrolled'));
+                expect(scroller.scrollTop).toBeLessThan(0);
+                return { view, scroller };
+            }
+
+            /**
+             * Sends a file, which leaves a placeholder message behind and a
+             * slot request to answer.
+             *
+             * @param {any} _converse
+             * @param {any} view
+             */
+            async function sendFile(_converse, view) {
+                const { api } = _converse;
+                const domain = _converse.session.get('domain');
+                await mock.waitUntilDiscoConfirmed(
+                    _converse,
+                    domain,
+                    [{ 'category': 'server', 'type': 'IM' }],
+                    ['http://jabber.org/protocol/disco#items'],
+                    [],
+                    'info',
+                );
+                await mock.waitUntilDiscoConfirmed(_converse, domain, [], [], ['upload.montague.tld'], 'items');
+                await mock.waitUntilDiscoConfirmed(_converse, 'upload.montague.tld', [], [Strophe.NS.HTTPUPLOAD], []);
+
+                view.model.sendFiles([FILE]);
+                const iq = await u.waitUntil(() =>
+                    api.connection
+                        .get()
+                        .IQ_stanzas.filter((s) => s.querySelector('iq[to="upload.montague.tld"] request'))
+                        .pop(),
+                );
+                // The slot request only goes out once the placeholder exists, and it's the
+                // newest thing in the conversation, so grab it here rather than re-deriving
+                // it later: by the time the PUT completes, `sendMessage` may have run.
+                return { iq, placeholder: view.model.messages.last() };
+            }
+
+            /**
+             * The upload service's answer to the slot request.
+             *
+             * @param {Element} iq
+             */
+            function slotStanza(iq) {
+                return stx`
+                <iq from="upload.montague.tld"
+                    id="${iq.getAttribute('id')}"
+                    to="romeo@montague.lit/orchard"
+                    xmlns="jabber:client"
+                    type="result">
+                    <slot xmlns="urn:xmpp:http:upload:0">
+                        <put url="https://upload.montague.tld/put/my-juliet.jpg"/>
+                        <get url="${IMAGE_URL}"/>
+                    </slot>
+                </iq>`;
+            }
+
+            it(
+                'scrolls to it once the upload has finished',
+                mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
+                    const { api } = _converse;
+                    const { view, scroller } = await openChatScrolledUp(_converse);
+                    const { iq, placeholder } = await sendFile(_converse, view);
+
+                    // The upload is mocked out, so we get to decide when it
+                    // succeeds. Nothing may be scrolled to until then: the
+                    // message doesn't exist before the upload finishes.
+                    spyOn(XMLHttpRequest.prototype, 'send').and.callFake(function () {
+                        placeholder.save({
+                            'upload': _converse.SUCCESS,
+                            'oob_url': IMAGE_URL,
+                            'body': IMAGE_URL,
+                        });
+                    });
+                    api.connection.get()._dataRecv(mock.createRequest(_converse, slotStanza(iq)));
+
+                    // Wait on the message rendering, which happens after the
+                    // send and the clearing of the "scrolled" flag, so that the
+                    // assertions below report a real failure rather than a race.
+                    const selector = 'converse-chat-message-body .chat-image__link';
+                    const link = await u.waitUntil(() => view.querySelector(selector));
+                    expect(link.getAttribute('href')).toBe(IMAGE_URL);
+
+                    expect(view.model.ui.get('scrolled')).toBe(false);
+                    expect(Math.abs(scroller.scrollTop)).toBeLessThan(1);
+                }),
+            );
+
+            it(
+                'leaves you where you were when the upload fails',
+                mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
+                    const { api } = _converse;
+                    const { view, scroller } = await openChatScrolledUp(_converse);
+                    const { iq } = await sendFile(_converse, view);
+
+                    spyOn(XMLHttpRequest.prototype, 'send').and.callFake(function () {
+                        Object.defineProperty(this, 'status', { value: 500 });
+                        Object.defineProperty(this, 'responseText', { value: 'Quota exceeded' });
+                        Object.defineProperty(this, 'readyState', { value: XMLHttpRequest.DONE });
+                        this.onreadystatechange();
+                    });
+                    api.connection.get()._dataRecv(mock.createRequest(_converse, slotStanza(iq)));
+
+                    await u.waitUntil(() => view.model.messages.last()?.get('type') === 'error');
+                    // The error shows up where you are, and you stay there.
+                    expect(view.model.messages.last().get('upload')).toBe(_converse.FAILURE);
+                    expect(view.model.ui.get('scrolled')).toBe(true);
+                    expect(scroller.scrollTop).toBeLessThan(0);
+                }),
+            );
+        });
     });
 });

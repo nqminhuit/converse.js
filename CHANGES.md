@@ -32,6 +32,11 @@
   there. The composer clears the flag itself now, which also means a send prunes history according to
   `pruning_behavior` (as any other scroll to the end does). Commands that add nothing to the
   conversation, such as `/clear`, leave your reading position alone.
+- fix(chatview): Sending an image or file now scrolls down to it as well. The composer clears
+  the "scrolled" flag when you send a message, but a file has to be uploaded before it becomes a
+  message, so there was nothing to scroll to at the time. The flag is now cleared once the upload
+  finishes, and only then: a failed upload shows its error where you are instead. Note that the
+  jump happens on completion, not when you paste or drop the file.
 - feat(chatview): A button appears in the bottom-right corner of the message area when you scroll
   up, taking you back to the latest message. It shows the number of unread messages while there
   are any, and works in 1:1 chats, MUCs, MUC occupants and headline chats.
