@@ -4,7 +4,9 @@ converse-muc-chat-content {
     height: 100%;
     justify-content: space-between;
     overflow: auto;
-    position: relative; // anchor for the empty-state overlay below
+    // Element selectors don't cascade to the MUC's own tag, so the anchor for
+    // the scroll-down button and the empty-state overlay has to be set here too.
+    position: relative;
 }
 
 converse-muc-empty {

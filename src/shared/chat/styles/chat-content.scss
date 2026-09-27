@@ -4,4 +4,37 @@ converse-chat-content {
     height: 100%;
     justify-content: space-between;
     overflow: auto;
+    position: relative; // anchor for the scroll-down button and the empty-state overlay
+}
+
+.chat-content__scroll-down {
+    position: absolute;
+    bottom: 1rem;
+    inset-inline-end: 1rem;
+    z-index: 20; // same stacking as .new-msgs-indicator
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 1px solid var(--converse-border-color);
+    border-radius: 50%;
+    background-color: var(--background-color);
+    color: var(--chat-color);
+    box-shadow: var(--raised-el-shadow);
+    cursor: pointer;
+    opacity: 0.9;
+
+    &:hover,
+    &:focus {
+        opacity: 1;
+    }
+
+    .chat-content__scroll-down__badge {
+        position: absolute;
+        top: -0.5em;
+        inset-inline-end: -0.5em;
+        box-shadow: var(--raised-el-shadow);
+    }
 }

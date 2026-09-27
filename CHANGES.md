@@ -9,6 +9,16 @@
 - #3615: Add support for XEP-0277 Microblogging and XEP-0472 Social Feeds
 - #3978: Add support for XEP-0202 Entity Time.
 - Full XEP-0172 User Nickname support.
+- fix(chatview): Scrolling to the latest message again. `scrollDown` scrolled the
+  `converse-chat-content` host, which cannot scroll because its only child fills it, so every
+  programmatic jump to the end was a no-op: sending a message while scrolled up didn't move you,
+  and the "▼ You have unread messages" bar only hid itself. The scroll now targets the message
+  area, which also snaps the virtualized window to the newest messages first.
+- fix(chatview): The scroll handler's debounce never debounced, since it tested one timer variable
+  and cleared another, leaking a timer per scroll event.
+- feat(chatview): A button appears in the bottom-right corner of the message area when you scroll
+  up, taking you back to the latest message. It shows the number of unread messages while there
+  are any, and works in 1:1 chats, MUCs, MUC occupants and headline chats.
 - fix(chatview): The contact's name and status message in a chat header were painted the same
   colour as the header itself.
 - fix(chatview): Show the contact's status message in the chat header again. It was read off the
