@@ -108,7 +108,9 @@ function getCommandsForModel (model) {
     }
     if (typeof model.getAllowedCommands === 'function') {
         const details = getMUCDetails();
-        return model.getAllowedCommands().map((name) => ({ 'name': name, 'detail': details[name] || '' }));
+        // Upstream lists /nick twice for owner-moderators, dedupe for the menu.
+        const names = [...new Set(model.getAllowedCommands())];
+        return names.map((name) => ({ 'name': name, 'detail': details[name] || '' }));
     }
     if (isStaceaChat(model)) {
         const details = getStaceaDetails();

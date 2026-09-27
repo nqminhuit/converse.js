@@ -113,9 +113,6 @@ describe('Slash-command suggestions in MUCs', function () {
             const { view } = await enterMUC(_converse);
 
             await typeIntoComposer(view, '/');
-            // `getAllowedCommands` lists `/nick` twice for an owner-moderator
-            // (once as a base command, once via VISITOR_COMMANDS), so the menu
-            // shows it twice. What matters here is that nothing is truncated.
             expect(suggestions(view)).toEqual([
                 '/admin',
                 '/ban',
@@ -128,7 +125,6 @@ describe('Slash-command suggestions in MUCs', function () {
                 '/member',
                 '/modtools',
                 '/mute',
-                '/nick',
                 '/nick',
                 '/op',
                 '/owner',
