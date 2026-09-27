@@ -5,6 +5,21 @@ converse-message-actions {
 
     margin-inline-start: 0.5em;
 
+    > .chat-msg__action-copy.btn--standalone {
+        border: none;
+        background: transparent;
+        color: var(--foreground-color);
+        padding: 0 0.25em;
+        opacity: 0;
+        margin-top: -0.2em;
+        &:focus {
+            opacity: 1;
+        }
+        svg {
+            fill: var(--msg-actions-accent);
+        }
+    }
+
     .chat-msg__actions {
         .dropdown-menu {
             min-width: 5rem;

@@ -64,7 +64,9 @@ class MessageActions extends CustomElement {
         if (!this.model.collection) return '';
 
         const buttons = await this.getActionButtons();
-        const items = buttons.map((b) => MessageActions.getActionsDropdownItem(b));
+        const copy_button = buttons.find((b) => b.name === 'copy');
+        const dropdown_buttons = buttons.filter((b) => b.name !== 'copy');
+        const items = dropdown_buttons.map((b) => MessageActions.getActionsDropdownItem(b));
 
         /**
          * *Hook* which allows plugins to add extra content alongside the
@@ -80,17 +82,32 @@ class MessageActions extends CustomElement {
          */
         const extra_content = await api.hook('getMessageActionContent', this, html``);
 
-        if (items.length || extra_content) {
-            return html` ${items.length
-                ? html`<converse-dropdown
-                      class="chat-msg__actions btn-group dropstart"
-                      .items=${items}
-                  ></converse-dropdown>`
-                : ''}
-            ${extra_content}`;
+        if (items.length || copy_button || extra_content) {
+            return html` ${copy_button ? MessageActions.getStandaloneButton(copy_button) : ''}
+                ${items.length
+                    ? html`<converse-dropdown
+                          class="chat-msg__actions btn-group dropstart"
+                          .items=${items}
+                      ></converse-dropdown>`
+                    : ''}
+                ${extra_content}`;
         } else {
             return '';
         }
+    }
+
+    static getStandaloneButton(o) {
+        return html`
+            <button
+                type="button"
+                title="${o.i18n_text}"
+                aria-label="${o.i18n_text}"
+                class="btn btn--standalone chat-msg__action ${o.button_class}"
+                @click=${o.handler}
+            >
+                <converse-icon class="${o.icon_class}" size="1em"></converse-icon>
+            </button>
+        `;
     }
 
     static getActionsDropdownItem(o) {
