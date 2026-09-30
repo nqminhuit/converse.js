@@ -1,8 +1,11 @@
-import { api } from "@converse/headless";
+import { api } from '@converse/headless';
+import { html } from 'lit';
+import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 import 'shared/registry.js';
 import 'shared/modals/image.js';
 import { CustomElement } from 'shared/components/element.js';
 import renderTexture from 'shared/texture/directives/texture.js';
+import { isStaceaMarkdownMessage, renderStaceaMarkdown } from './markdown.js';
 
 import './styles/message-body.scss';
 
@@ -48,6 +51,16 @@ export default class MessageBody extends CustomElement {
 
     render () {
         const callback = () => this.model.collection?.trigger('rendered', this.model);
+        if (
+            isStaceaMarkdownMessage(this.model) &&
+            !this.model.get('is_unstyled') &&
+            api.settings.get('allow_message_styling')
+        ) {
+            callback();
+            const message_text = this.text || '';
+            const markdown_text = message_text.startsWith('/me ') ? message_text.slice(4) : message_text;
+            return html`<div class="stacea-markdown">${unsafeHTML(renderStaceaMarkdown(markdown_text))}</div>`;
+        }
         const offset = 0;
         /** @type {{ [key: string]: any }} */
         const options = {

@@ -1,5 +1,8 @@
 import { __ } from 'i18n';
 import { _converse, api } from '@converse/headless';
+import { STACEA_JID } from 'shared/chat/identity.js';
+
+export { STACEA_JID } from 'shared/chat/identity.js';
 
 export function clearHistory (jid) {
     if (location.hash === `converse/chat?jid=${jid}`) {
@@ -24,8 +27,6 @@ export async function clearMessages (chat) {
 // `/help` and `/tools` are sent as normal messages instead of opening local
 // UI. Her reply is what makes her commands discoverable. All other local
 // commands (`/clear`, `/close`) keep working in her chat.
-export const STACEA_JID = 'stacea@chit.prud.uk';
-
 export function isStaceaChat (chat) {
     return chat?.get('jid') === STACEA_JID;
 }
