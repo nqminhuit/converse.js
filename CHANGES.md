@@ -2,6 +2,8 @@
 
 ## 15.0.0 (Unreleased)
 
+- Markdown is rendered for incoming direct messages from Stacea, including tables and code blocks;
+  other conversations and messages with styling disabled keep the existing rendering behavior.
 - chore(chatview): Removed the dead `BaseChatView.scrollDown()`. Nothing called it since
   scrolling moved into `ChatContent`, whose own `scrollDown()` is the replacement.
 - fix(chatview): `/clear` now stays cleared. It only ever emptied the local cache, and a reload

@@ -6,6 +6,12 @@ converse-chat-message-body {
     margin-inline-end: 0.5em;
     overflow-y: hidden; // Hide zalgo text that overflows vertically
 
+    &:has(.stacea-markdown) {
+        display: block;
+        min-width: 0;
+        max-width: 100%;
+    }
+
     audio {
         display: block;
         max-width: 95%;
@@ -19,6 +25,62 @@ converse-chat-message-body {
         }
         @include media-breakpoint-up(md) {
             max-width: 70%;
+        }
+    }
+
+    .stacea-markdown {
+        display: block;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow-wrap: anywhere;
+        white-space: normal;
+
+        p,
+        blockquote,
+        ul,
+        ol,
+        table,
+        pre {
+            margin-block: 0.5em;
+        }
+
+        blockquote {
+            border-inline-start: 0.25em solid var(--converse-border-color, #dee2e6);
+            padding-inline-start: 0.75em;
+            color: var(--secondary-color, inherit);
+        }
+
+        table {
+            display: block;
+            width: max-content;
+            max-width: 100%;
+            overflow-x: auto;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--converse-border-color, #dee2e6);
+            padding: 0.25em 0.5em;
+            white-space: nowrap;
+        }
+
+        pre {
+            max-width: 100%;
+            overflow: auto;
+            white-space: pre;
+            background: var(--inset-bg-color, rgba(0, 0, 0, 0.06));
+            padding: 0.5em;
+        }
+
+        code {
+            white-space: pre-wrap;
+        }
+
+        pre code {
+            white-space: pre;
         }
     }
 }
