@@ -57,7 +57,9 @@ export default class MessageBody extends CustomElement {
             api.settings.get('allow_message_styling')
         ) {
             callback();
-            return html`<div class="stacea-markdown">${unsafeHTML(renderStaceaMarkdown(this.text || ''))}</div>`;
+            const message_text = this.text || '';
+            const markdown_text = message_text.startsWith('/me ') ? message_text.slice(4) : message_text;
+            return html`<div class="stacea-markdown">${unsafeHTML(renderStaceaMarkdown(markdown_text))}</div>`;
         }
         const offset = 0;
         /** @type {{ [key: string]: any }} */

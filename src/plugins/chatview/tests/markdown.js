@@ -1,8 +1,18 @@
 import mock from '../../../shared/tests/mock.js';
 import converse from '../../../../dist/converse.js';
+import { isStaceaMarkdownMessage } from '../../../shared/chat/markdown.js';
 
 const { stx, u } = converse.env;
 const STACEA_JID = 'stacea@chit.prud.uk';
+const ORIGINAL_MESSAGE_ID = 'stacea-markdown-original';
+
+function markdown_message_model({ from = STACEA_JID, type = 'chat', jid = STACEA_JID, sender = 'them' } = {}) {
+    const attrs = { from, type, sender };
+    return {
+        get: (key) => attrs[key],
+        chatbox: { get: (key) => (key === 'jid' ? jid : undefined) },
+    };
+}
 
 async function addStaceaContact(_converse) {
     await mock.waitForRoster(_converse, 'current', 1);
@@ -14,10 +24,10 @@ async function addStaceaContact(_converse) {
     );
 }
 
-function incomingMessage(_converse, from, body, type = 'chat', extra = '') {
+function incomingMessage(_converse, from, body, type = 'chat', extra = '', id = u.getUniqueId()) {
     const { api } = _converse;
     return stx`<message from="${from}"
-                    id="${u.getUniqueId()}"
+                    id="${id}"
                     to="${api.connection.get().jid}"
                     type="${type}"
                     xmlns="jabber:client">
@@ -40,6 +50,8 @@ describe('Stacea Markdown rendering', function () {
                 '- one',
                 '- **two** and ~~three~~',
                 '',
+                '3. starts at three',
+                '',
                 '| A | B |',
                 '| - | - |',
                 `| cell | ${'wide-content-'.repeat(12)} |`,
@@ -56,10 +68,14 @@ describe('Stacea Markdown rendering', function () {
                 '<script>alert(1)</script>',
                 '[unsafe](javascript:alert(1))',
                 '[obfuscated](java&#x73;cript:alert(1))',
+                '[data](data:text/html,unsafe)',
+                '[vbscript](vbscript:alert(1))',
+                '[encoded control](java&#x0a;script:alert(1))',
+                '<img src=x onerror=alert(1)>',
             ].join('\n');
             const delay = stx`<delay xmlns="urn:xmpp:delay" stamp="2026-09-30T12:00:00Z"/>`;
             await _converse.handleMessageStanza(
-                incomingMessage(_converse, `${STACEA_JID}/assistant`, original, 'chat', delay),
+                incomingMessage(_converse, `${STACEA_JID}/assistant`, original, 'chat', delay, ORIGINAL_MESSAGE_ID),
             );
 
             const chat = _converse.chatboxes.get(STACEA_JID);
@@ -70,11 +86,13 @@ describe('Stacea Markdown rendering', function () {
             expect(body.querySelector('h1')?.textContent).toBe('A heading');
             expect(body.querySelector('blockquote')?.textContent).toContain('Citation text');
             expect(body.querySelector('table td')?.textContent).toBe('cell');
+            expect(body.querySelector('ol[start="3"]')).toBeTruthy();
             expect(body.querySelector('strong')?.textContent).toBe('two');
             expect(body.querySelector('del')?.textContent).toBe('three');
             expect(body.querySelectorAll('a[href^="https://"]').length).toBe(2);
             expect(body.querySelector('img')).toBeNull();
             expect(body.querySelector('script, [onerror], [style]')).toBeNull();
+            expect(body.querySelectorAll('a').length).toBe(2);
             expect(body.querySelector('pre code').textContent).toContain('<img src=x onerror=alert(1)>');
             expect(body.textContent).toContain('<script>alert(1)</script>');
             expect(body.querySelectorAll('a[href^="javascript:"]').length).toBe(0);
@@ -87,11 +105,52 @@ describe('Stacea Markdown rendering', function () {
             expect(code_block.scrollWidth).toBeGreaterThan(code_block.clientWidth);
             expect(chat.messages.at(0).get('message')).toBe(original);
 
-            chat.messages.at(0).save({ body: '# Updated from archive', message: '# Updated from archive' });
+            const archived_correction = stx`<message xmlns="jabber:client" to="${_converse.jid}" from="${_converse.bare_jid}" type="chat" id="stacea-markdown-correction-mam">
+                <result xmlns="urn:xmpp:mam:2" queryid="stacea-markdown-query" id="stacea-markdown-archive-id">
+                    <forwarded xmlns="urn:xmpp:forward:0">
+                        <delay xmlns="urn:xmpp:delay" stamp="2026-09-30T12:01:00Z"/>
+                        <message xmlns="jabber:client" from="${STACEA_JID}/assistant" to="${_converse.jid}" type="chat" id="stacea-markdown-correction">
+                            <body># Updated from archive</body>
+                            <replace xmlns="urn:xmpp:message-correct:0" id="${ORIGINAL_MESSAGE_ID}"/>
+                        </message>
+                    </forwarded>
+                </result>
+            </message>`;
+            _converse.handleMAMResult(chat, { messages: [archived_correction.tree()] });
             await u.waitUntil(
                 () => view.querySelector('.chat-msg__text h1')?.textContent === 'Updated from archive',
             );
             expect(chat.messages.at(0).get('message')).toBe('# Updated from archive');
+            expect(Object.values(chat.messages.at(0).get('older_versions'))).toContain(original);
+        }),
+    );
+
+    it('selects only direct messages from the exact Stacea bare JID', function () {
+        expect(isStaceaMarkdownMessage(markdown_message_model())).toBe(true);
+        expect(isStaceaMarkdownMessage(markdown_message_model({ from: `${STACEA_JID}/assistant` }))).toBe(true);
+        expect(isStaceaMarkdownMessage(markdown_message_model({ type: 'groupchat' }))).toBe(false);
+        expect(isStaceaMarkdownMessage(markdown_message_model({ type: 'headline' }))).toBe(false);
+        expect(isStaceaMarkdownMessage(markdown_message_model({ from: 'stacea@chit.prud.uk.evil' }))).toBe(false);
+        expect(isStaceaMarkdownMessage(markdown_message_model({ jid: 'stacea@chit.prud.uk.evil' }))).toBe(false);
+        expect(isStaceaMarkdownMessage(markdown_message_model({ sender: 'me' }))).toBe(false);
+    });
+
+    it(
+        'keeps /me action messages and their original text',
+        mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
+            await addStaceaContact(_converse);
+            await mock.openControlBox(_converse);
+            const action_text = '/me is tired';
+            await _converse.handleMessageStanza(
+                incomingMessage(_converse, `${STACEA_JID}/assistant`, action_text, 'chat'),
+            );
+
+            const chat = _converse.chatboxes.get(STACEA_JID);
+            const view = _converse.chatboxviews.get(STACEA_JID);
+            await u.waitUntil(() => view.querySelector('.stacea-markdown'));
+            expect(view.querySelector('.chat-msg__content--action')).toBeTruthy();
+            expect(view.querySelector('.stacea-markdown').textContent.trim()).toBe('is tired');
+            expect(chat.messages.at(0).get('message')).toBe(action_text);
         }),
     );
 

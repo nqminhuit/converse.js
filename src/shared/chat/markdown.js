@@ -1,6 +1,5 @@
 import DOMPurify from 'dompurify';
 import MarkdownIt from 'markdown-it';
-import { converse } from '@converse/headless';
 import { STACEA_JID } from './identity.js';
 
 const ALLOWED_TAGS = [
@@ -11,7 +10,8 @@ const HREF_ATTRIBUTE = 'href';
 const REL_ATTRIBUTE = 'rel';
 const TARGET_ATTRIBUTE = 'target';
 const MAILTO_SCHEME = 'mailto:';
-const ALLOWED_ATTR = [HREF_ATTRIBUTE, REL_ATTRIBUTE, TARGET_ATTRIBUTE, 'title'];
+const START_ATTRIBUTE = 'start';
+const ALLOWED_ATTR = [HREF_ATTRIBUTE, REL_ATTRIBUTE, START_ATTRIBUTE, TARGET_ATTRIBUTE, 'title'];
 const SAFE_SCHEME = /^(?:https?:\/\/|mailto:)/i;
 
 function escapeHTML(value) {
@@ -71,7 +71,7 @@ export function isStaceaMarkdownMessage(model) {
         ['chat', 'normal'].includes(model.get('type')) &&
         model.chatbox?.get('jid') === STACEA_JID &&
         from &&
-        converse.env.Strophe.getBareJidFromJid(from) === STACEA_JID
+        from.split('/')[0] === STACEA_JID
     );
 }
 
@@ -81,10 +81,18 @@ export function renderStaceaMarkdown(text) {
     const clean = DOMPurify.sanitize(rendered, {
         ALLOWED_TAGS,
         ALLOWED_ATTR,
+        ADD_ATTR: [START_ATTRIBUTE],
         ALLOWED_URI_REGEXP: SAFE_SCHEME,
     });
     const template = document.createElement('template');
     template.innerHTML = clean;
+    const ordered_list_starts = Array.from(rendered.matchAll(/<ol(?:\s+start="(-?\d+)")?>/g), (match) => match[1]);
+    template.content.querySelectorAll('ol').forEach((list, index) => {
+        const start = ordered_list_starts[index];
+        if (start && Number.isSafeInteger(Number(start))) {
+            list.setAttribute(START_ATTRIBUTE, start);
+        }
+    });
     template.content.querySelectorAll('a').forEach((anchor) => {
         const safe_href = getSafeHref(anchor.getAttribute(HREF_ATTRIBUTE));
         if (!safe_href) {
