@@ -93,7 +93,7 @@ function getStaceaDetails () {
         'remind': __('set a reminder: /remind 30m stretch'),
         'reminders': __('list pending reminders'),
         'status': __('my health: models, usage, limits, errors'),
-        'talk': __('inference route: /talk private|free|public'),
+        'talk': __('inference route: /talk to show, /talk private|free|public to change'),
         'tools': __('list the tools I can use right now'),
         'unremind': __('cancel one: /unremind 3'),
         'work': __('availability: back to work, still the same tools and routing'),

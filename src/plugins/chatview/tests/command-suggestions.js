@@ -123,7 +123,7 @@ describe('Slash-command suggestions in 1:1 chats', function () {
             expect(detailFor(view, '/help')).toBe('this list');
             expect(detailFor(view, '/work')).toBe('availability: back to work, still the same tools and routing');
             expect(detailFor(view, '/relax')).toBe('availability: off work, still the same tools and routing');
-            expect(detailFor(view, '/talk')).toBe('inference route: /talk private|free|public');
+            expect(detailFor(view, '/talk')).toBe('inference route: /talk to show, /talk private|free|public to change');
             expect(detailFor(view, '/mode')).toBe('behavior: /mode normal|office|sexy');
         }),
     );
