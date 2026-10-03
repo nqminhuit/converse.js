@@ -23,11 +23,13 @@ const COMMAND_QUERY = /^\/([A-Za-z0-9_-]*)$/;
 const STACEA_COMMAND_NAMES = [
     'avatar',
     'help',
+    'mode',
     'refresh',
     'relax',
     'remind',
     'reminders',
     'status',
+    'talk',
     'tools',
     'unremind',
     'work',
@@ -85,14 +87,16 @@ function getStaceaDetails () {
         'clear': __('Remove messages'),
         'close': __('Close this chat'),
         'help': __('this list'),
+        'mode': __('behavior: /mode normal|office|sexy'),
         'refresh': __('start fresh: I forget our chat so far'),
-        'relax': __('off work: I just chat, no tools'),
+        'relax': __('availability: off work, still the same tools and routing'),
         'remind': __('set a reminder: /remind 30m stretch'),
         'reminders': __('list pending reminders'),
         'status': __('my health: models, usage, limits, errors'),
+        'talk': __('inference route: /talk private|free|public'),
         'tools': __('list the tools I can use right now'),
         'unremind': __('cancel one: /unremind 3'),
-        'work': __('back to work: tools on'),
+        'work': __('availability: back to work, still the same tools and routing'),
     };
 }
 
