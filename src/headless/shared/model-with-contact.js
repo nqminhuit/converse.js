@@ -6,6 +6,17 @@ import api from './api/index.js';
 import { PRIVATE_CHAT_TYPE } from './constants.js';
 
 /**
+ * The blocklist only exists on servers that support XEP-0191; waiting for it
+ * on others would never resolve and the chat would never open.
+ * @param {string} jid
+ */
+async function isBlocked(jid) {
+    const domain = _converse.session.get('domain');
+    if (!(await api.disco.supports(Strophe.NS.BLOCKING, domain))) return false;
+    return !!(await api.blocklist.get()).get(jid);
+}
+
+/**
  * @template {import('./types').ModelExtender} T
  * @param {T} BaseModel
  */
@@ -63,7 +74,7 @@ export default function ModelWithContact(BaseModel) {
 
                 // A JID without a localpart (a server, a service or XEP-0100 gateway)
                 // can't be made into a roster contact, but we can still chat with it.
-                if (!contact && create && u.isValidJID(jid) && !(await api.blocklist.get()).get(jid)) {
+                if (!contact && create && u.isValidJID(jid) && !(await isBlocked(jid))) {
                     contact = await api.contacts.add({ jid }, false, false);
                 }
             }
