@@ -243,6 +243,34 @@ describe('Slash-command suggestions in 1:1 chats', function () {
     );
 
     it(
+        'closes the menu for a leaf that is a substring of another option',
+        mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
+            await mock.waitForRoster(_converse, 'current', 1);
+            const stacea_jid = 'stacea@chit.prud.uk';
+            _converse.state.roster.create({ 'jid': stacea_jid, 'subscription': 'both' });
+            const view = await openChat(_converse, stacea_jid);
+            const form = mock.getMessageForm(view);
+
+            await typeIntoComposer(view, '/avatar sexy o');
+            expect(suggestions(view)).toEqual([
+                '/avatar sexy off',
+                '/avatar sexy on',
+                '/avatar sexy confirm',
+            ]);
+            form.typeahead.choose(1);
+            await u.waitUntil(() => form.rawText() === '/avatar sexy on');
+            await form.typeahead.update();
+            expect(suggestions(view)).toEqual([]);
+
+            await typeIntoComposer(view, '/avatar sexy on');
+            expect(suggestions(view)).toEqual([]);
+            await mock.pressComposerKey(view, 'Enter');
+            await u.waitUntil(() => view.model.messages.length === 1);
+            expect(view.model.messages.at(0).get('message')).toBe('/avatar sexy on');
+        }),
+    );
+
+    it(
         'offers no arguments for free-text commands or outside Stacea chat',
         mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
             await mock.waitForRoster(_converse, 'current', 1);

@@ -165,12 +165,16 @@ function getArgItems (query) {
     const at = q.lastIndexOf(' ');
     const path = q.slice(0, at).trim().split(/ +/).join(' ');
     const prefix = q.slice(at + 1);
+    const options = STACEA_ARGS[path] ?? [];
+    // A fully typed leaf closes the menu, even if it is a substring of another option,
+    // so Enter sends it instead of completing to that other option.
+    if (options.some((o) => o.name === prefix && !Object.hasOwn(STACEA_ARGS, `${path} ${o.name}`))) {
+        return [];
+    }
     const ranked = [];
-    for (const option of STACEA_ARGS[path] ?? []) {
+    for (const option of options) {
         const idx = option.name.indexOf(prefix);
-        // A fully typed leaf is dropped so the menu closes and Enter sends it.
-        const done = option.name === prefix && !Object.hasOwn(STACEA_ARGS, `${path} ${option.name}`);
-        if (idx !== -1 && !done) {
+        if (idx !== -1) {
             ranked.push({ option, idx });
         }
     }
