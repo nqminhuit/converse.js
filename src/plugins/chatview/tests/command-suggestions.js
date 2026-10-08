@@ -100,8 +100,8 @@ describe('Slash-command suggestions in 1:1 chats', function () {
                 '/avatar',
                 '/clear',
                 '/close',
+                '/credit',
                 '/help',
-                '/mode',
                 '/refresh',
                 '/relax',
                 '/remind',
@@ -123,8 +123,8 @@ describe('Slash-command suggestions in 1:1 chats', function () {
             expect(detailFor(view, '/help')).toBe('this list');
             expect(detailFor(view, '/work')).toBe('availability: back to work, still the same tools and routing');
             expect(detailFor(view, '/relax')).toBe('availability: off work, still the same tools and routing');
-            expect(detailFor(view, '/talk')).toBe('inference route: /talk to show, /talk private|free|public to change');
-            expect(detailFor(view, '/mode')).toBe('behavior: /mode normal|office|sexy');
+            expect(detailFor(view, '/talk')).toBe('/talk to show, /talk private|free|public|sexy to change');
+            expect(detailFor(view, '/credit')).toBe('paid providers out of credit: /credit, /credit reset <provider> after a top-up');
         }),
     );
 
