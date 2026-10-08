@@ -150,4 +150,142 @@ describe('Slash-command suggestions in 1:1 chats', function () {
             expect(_converse.api.confirm.calls.count()).toBe(0);
         }),
     );
+
+    it(
+        'completes Stacea argument words, ranked and with details',
+        mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
+            await mock.waitForRoster(_converse, 'current', 1);
+            const stacea_jid = 'stacea@chit.prud.uk';
+            _converse.state.roster.create({ 'jid': stacea_jid, 'subscription': 'both' });
+            const view = await openChat(_converse, stacea_jid);
+
+            await typeIntoComposer(view, '/talk ');
+            expect(suggestions(view)).toEqual([
+                '/talk cancel',
+                '/talk confirm',
+                '/talk free',
+                '/talk private',
+                '/talk public',
+                '/talk sexy',
+            ]);
+            expect(detailFor(view, '/talk public')).toBe('any approved cloud route');
+
+            await typeIntoComposer(view, '/talk pu');
+            expect(suggestions(view)).toEqual(['/talk public']);
+            await typeIntoComposer(view, '/TALK pu');
+            expect(suggestions(view)).toEqual(['/talk public']);
+
+            await typeIntoComposer(view, '/credit reset ');
+            expect(suggestions(view)).toEqual(['/credit reset deepinfra', '/credit reset opencode']);
+        }),
+    );
+
+    it(
+        'leaves a picked leaf argument ready to send, with the menu closed',
+        mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
+            await mock.waitForRoster(_converse, 'current', 1);
+            const stacea_jid = 'stacea@chit.prud.uk';
+            _converse.state.roster.create({ 'jid': stacea_jid, 'subscription': 'both' });
+            const view = await openChat(_converse, stacea_jid);
+            const form = mock.getMessageForm(view);
+
+            await typeIntoComposer(view, '/talk pu');
+            form.typeahead.choose(0);
+            await u.waitUntil(() => form.rawText() === '/talk public');
+            await form.typeahead.update();
+            expect(suggestions(view)).toEqual([]);
+        }),
+    );
+
+    it(
+        'chains into the next level when the picked argument has options of its own',
+        mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
+            await mock.waitForRoster(_converse, 'current', 1);
+            const stacea_jid = 'stacea@chit.prud.uk';
+            _converse.state.roster.create({ 'jid': stacea_jid, 'subscription': 'both' });
+            const view = await openChat(_converse, stacea_jid);
+            const form = mock.getMessageForm(view);
+
+            await typeIntoComposer(view, '/avatar s');
+            expect(suggestions(view)).toEqual(['/avatar sexy', '/avatar list']);
+            form.typeahead.choose(0);
+            await u.waitUntil(() => form.rawText() === '/avatar sexy ');
+            await form.typeahead.update();
+            await u.waitUntil(() => suggestions(view).length === 3);
+            expect(suggestions(view)).toEqual([
+                '/avatar sexy confirm',
+                '/avatar sexy off',
+                '/avatar sexy on',
+            ]);
+        }),
+    );
+
+    it(
+        'completes a partial argument on Enter but sends a full one',
+        mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
+            await mock.waitForRoster(_converse, 'current', 1);
+            const stacea_jid = 'stacea@chit.prud.uk';
+            _converse.state.roster.create({ 'jid': stacea_jid, 'subscription': 'both' });
+            const view = await openChat(_converse, stacea_jid);
+            const form = mock.getMessageForm(view);
+
+            await typeIntoComposer(view, '/talk pu');
+            await mock.pressComposerKey(view, 'Enter');
+            await u.waitUntil(() => form.rawText() === '/talk public');
+            expect(view.model.messages.length).toBe(0);
+
+            await typeIntoComposer(view, '/talk public');
+            expect(suggestions(view)).toEqual([]);
+            await mock.pressComposerKey(view, 'Enter');
+            await u.waitUntil(() => view.model.messages.length === 1);
+            expect(view.model.messages.at(0).get('message')).toBe('/talk public');
+        }),
+    );
+
+    it(
+        'closes the menu for a leaf that is a substring of another option',
+        mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
+            await mock.waitForRoster(_converse, 'current', 1);
+            const stacea_jid = 'stacea@chit.prud.uk';
+            _converse.state.roster.create({ 'jid': stacea_jid, 'subscription': 'both' });
+            const view = await openChat(_converse, stacea_jid);
+            const form = mock.getMessageForm(view);
+
+            await typeIntoComposer(view, '/avatar sexy o');
+            expect(suggestions(view)).toEqual([
+                '/avatar sexy off',
+                '/avatar sexy on',
+                '/avatar sexy confirm',
+            ]);
+            form.typeahead.choose(1);
+            await u.waitUntil(() => form.rawText() === '/avatar sexy on');
+            await form.typeahead.update();
+            expect(suggestions(view)).toEqual([]);
+
+            await typeIntoComposer(view, '/avatar sexy on');
+            expect(suggestions(view)).toEqual([]);
+            await mock.pressComposerKey(view, 'Enter');
+            await u.waitUntil(() => view.model.messages.length === 1);
+            expect(view.model.messages.at(0).get('message')).toBe('/avatar sexy on');
+        }),
+    );
+
+    it(
+        'offers no arguments for free-text commands or outside Stacea chat',
+        mock.initConverse(converse, ['chatBoxesFetched'], {}, async function (_converse) {
+            await mock.waitForRoster(_converse, 'current', 1);
+            const stacea_jid = 'stacea@chit.prud.uk';
+            _converse.state.roster.create({ 'jid': stacea_jid, 'subscription': 'both' });
+            const view = await openChat(_converse, stacea_jid);
+            for (const text of ['/remind ', '/unremind ', '/help ']) {
+                await typeIntoComposer(view, text);
+                expect(suggestions(view)).toEqual([]);
+            }
+
+            const contact_jid = mock.cur_names[0].replace(/ /g, '.').toLowerCase() + '@montague.lit';
+            const other = await openChat(_converse, contact_jid);
+            await typeIntoComposer(other, '/talk ');
+            expect(suggestions(other)).toEqual([]);
+        }),
+    );
 });
