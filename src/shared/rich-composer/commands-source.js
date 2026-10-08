@@ -14,10 +14,13 @@ import { __ } from 'i18n';
 import { isStaceaChat } from 'plugins/chatview/utils.js';
 
 const COMMAND_QUERY = /^\/([A-Za-z0-9_-]*)$/;
+// Stacea only: `/talk pu`, `/avatar sexy o`. Group 1 is the words before the last space.
+const ARG_QUERY = /^\/((?:[A-Za-z0-9_-]+ )+)([A-Za-z0-9_-]*)$/;
 
 /**
  * Snapshot of Stacea's backend commands (see the `commands` object in
- * `apps/stacea/internal/lines/lines.json` in the nuc14ess repo). Hardcoded on
+ * `apps/stacea/internal/lines/lines.json` in the nuc14ess repo) and, in
+ * `STACEA_ARGS`, the argument words her parsers accept. Hardcoded on
  * purpose: her commands change rarely, so no live fetch.
  */
 const STACEA_COMMAND_NAMES = [
@@ -34,6 +37,32 @@ const STACEA_COMMAND_NAMES = [
     'unremind',
     'work',
 ];
+
+/** Argument words per command path (lowercase, space-joined), in menu-neutral order. */
+const STACEA_ARGS = {
+    'talk': [
+        { 'name': 'private', 'detail': __('local plus approved zero-retention cloud routes') },
+        { 'name': 'free', 'detail': __('approved zero-cost routes') },
+        { 'name': 'public', 'detail': __('any approved cloud route') },
+        { 'name': 'sexy', 'detail': __('private and local only') },
+        { 'name': 'confirm', 'detail': __('answer a pending switch') },
+        { 'name': 'cancel', 'detail': __('answer a pending switch') },
+    ],
+    'avatar': [
+        { 'name': 'list', 'detail': __('list my photos') },
+        { 'name': 'sexy', 'detail': __('sexy photos opt-in: on, confirm, off') },
+    ],
+    'avatar sexy': [
+        { 'name': 'on', 'detail': __('ask to allow sexy photos') },
+        { 'name': 'confirm', 'detail': __('confirm within 2 minutes') },
+        { 'name': 'off', 'detail': __('stop using sexy photos') },
+    ],
+    'credit': [{ 'name': 'reset', 'detail': __('after a top-up: /credit reset <provider>') }],
+    'credit reset': [
+        { 'name': 'deepinfra', 'detail': __('DeepInfra') },
+        { 'name': 'opencode', 'detail': __('OpenCode Zen') },
+    ],
+};
 
 /**
  * One-liners for the 1:1 local commands, reusing the help-menu strings in
@@ -128,6 +157,32 @@ function getCommandsForModel (model) {
 }
 
 /**
+ * Argument items for a `path prefix` query (see `getQuery`).
+ * @param {string} query
+ */
+function getArgItems (query) {
+    const q = query.toLowerCase();
+    const at = q.lastIndexOf(' ');
+    const path = q.slice(0, at).trim().split(/ +/).join(' ');
+    const prefix = q.slice(at + 1);
+    const ranked = [];
+    for (const option of STACEA_ARGS[path] ?? []) {
+        const idx = option.name.indexOf(prefix);
+        // A fully typed leaf is dropped so the menu closes and Enter sends it.
+        const done = option.name === prefix && !Object.hasOwn(STACEA_ARGS, `${path} ${option.name}`);
+        if (idx !== -1 && !done) {
+            ranked.push({ option, idx });
+        }
+    }
+    ranked.sort((a, b) => a.idx - b.idx || (a.option.name < b.option.name ? -1 : 1));
+    return ranked.map(({ option }) => ({
+        'label': `/${path} ${option.name}`,
+        'detail': option.detail,
+        'name': `${path} ${option.name}`,
+    }));
+}
+
+/**
  * Build the slash-command source for one composer.
  * @param {() => any} getModel - The chatbox or MUC model behind the composer.
  * @returns {import('./types').TypeaheadSource}
@@ -141,11 +196,24 @@ export function makeCommandsSource (getModel) {
             if (typeof text !== 'string') {
                 return null;
             }
-            return text.match(COMMAND_QUERY)?.[1] ?? null;
+            const name = text.match(COMMAND_QUERY)?.[1];
+            if (name !== undefined) {
+                return name;
+            }
+            const args = isStaceaChat(getModel()) ? text.match(ARG_QUERY) : null;
+            if (!args) {
+                return null;
+            }
+            const path = args[1].trim().toLowerCase().split(/ +/).join(' ');
+            // Raw case: `choose` must find this exact text in the composer.
+            return Object.hasOwn(STACEA_ARGS, path) ? `${args[1]}${args[2]}` : null;
         },
 
         /** @param {string} query */
         getItems (query) {
+            if (query.includes(' ')) {
+                return getArgItems(query);
+            }
             const commands = getCommandsForModel(getModel());
             const q = query.toLowerCase();
             const ranked = [];
@@ -167,7 +235,12 @@ export function makeCommandsSource (getModel) {
             }));
         },
 
-        // A trailing space, so arguments can follow straight on.
-        choose: (handle, query, item) => handle?.replaceTrigger(`/${query}`, `/${item.name} `),
+        // A command name gets a trailing space so arguments can follow; an argument only
+        // when it has options of its own, so a finished command is left ready to send.
+        choose: (handle, query, item) => {
+            const isArg = item.name.includes(' ');
+            const next = !isArg || Object.hasOwn(STACEA_ARGS, item.name) ? ' ' : '';
+            return handle?.replaceTrigger(`/${query}`, `/${item.name}${next}`);
+        },
     };
 }
